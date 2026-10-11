@@ -10,7 +10,7 @@ type Props = {
 
 export function Slider({ label, value, min, max, step, disabled, onChange }: Props) {
   return (
-    <label style={{ display: "block" }}>
+    <label className="flex flex-col">
       {label}: {value}
       <input
         type="range"
