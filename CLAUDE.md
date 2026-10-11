@@ -2,7 +2,7 @@
 
 ## Imports and folders
 
-- Use alias imports with `@/` (points to the app's own `src/`: `web/src/` or `server/src/`) for anything outside the current folder: `import { step } from "@/domain"`. Never use `../`.
+- Use alias imports with `@/` (points to the app's own `src/`: `web/src/` or `server/src/`) for anything outside the current folder: `import { step } from "@/core"`. Never use `../`.
 - Use `./` only for files in the same folder (inside `index.ts`, or e.g. `ConfigPanel` importing `./Slider`).
 - In `web/`, the `@/` alias is set in two places that must stay in sync: `paths` in `web/tsconfig.app.json` and `resolve.alias` in `web/vite.config.ts`.
 - In `server/`, the `@/` alias is set only in `paths` in `server/tsconfig.json` (`tsx` reads it).

@@ -1,20 +1,17 @@
+import cors from "cors";
 import express from "express";
-import { step, type PendulumState } from "@/domain";
+import { createSimulation } from "@/simulation";
 
-const PORT = 3001;
-const DT = 1 / 60;
-const LENGTH = 2;
+const PORT = Number(process.env.PORT ?? 3001);
 
-let state: PendulumState = { angle: 0.5, velocity: 0 };
-
-setInterval(() => {
-  state = step(state, LENGTH, DT);
-}, DT * 1000);
+const simulation = createSimulation();
+simulation.start();
 
 const app = express();
+app.use(cors());
 
 app.get("/state", (_req, res) => {
-  res.json(state);
+  res.json(simulation.getState());
 });
 
 app.listen(PORT, () => {
