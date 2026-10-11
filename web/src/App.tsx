@@ -1,5 +1,5 @@
-import { useSimulation } from "./hooks";
-import { Controls, ConfigPanel, PendulumView } from "./components";
+import { useSimulation } from "@/hooks";
+import { Controls, ConfigPanel, PendulumView } from "@/components";
 
 export default function App() {
   const sim = useSimulation();

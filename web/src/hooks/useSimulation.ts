@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { step, type PendulumState } from "../domain/physics";
-import { DEFAULT_CONFIG, initialState, type PendulumConfig } from "../domain/config";
+import { step, DEFAULT_CONFIG, initialState, type PendulumState, type PendulumConfig } from "@/domain";
 
 const DT = 1 / 60;
 
