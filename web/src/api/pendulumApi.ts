@@ -1,30 +1,19 @@
 import type { PendulumConfig, ServerState } from "@shared";
-
-const SERVER_URL = "http://localhost:3001";
+import { http } from "./axios";
 
 export type Command = "start" | "pause" | "stop";
 
 export async function fetchState(): Promise<ServerState> {
-  const response = await fetch(`${SERVER_URL}/state`);
-  if (!response.ok) {
-    throw new Error(`State request failed (${response.status})`);
-  }
-  return response.json();
+  const { data } = await http.get<ServerState>("/state");
+  return data;
 }
 
 export async function sendCommand(command: Command): Promise<ServerState> {
-  const response = await fetch(`${SERVER_URL}/${command}`, { method: "POST" });
-  return response.json();
+  const { data } = await http.post<ServerState>(`/${command}`);
+  return data;
 }
 
 export async function sendConfig(change: Partial<PendulumConfig>): Promise<ServerState> {
-  const response = await fetch(`${SERVER_URL}/config`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(change),
-  });
-  if (!response.ok) {
-    throw new Error(`Config refused (${response.status})`);
-  }
-  return response.json();
+  const { data } = await http.post<ServerState>("/config", change);
+  return data;
 }
