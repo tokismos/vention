@@ -1,13 +1,14 @@
 import { useSimulation } from "@/hooks";
-import { Controls, ConfigPanel, PendulumView, StatusBadge } from "@/components";
+import { Controls, ConfigPanel, ConnectionBadge, PendulumView, StatusBadge } from "@/components";
 
 export default function App() {
-  const { state, status, start, pause, stop, updateConfig } = useSimulation();
+  const { state, connection, status, start, pause, stop, updateConfig } = useSimulation();
 
   return (
     <div className="flex min-h-screen">
       <aside className="flex w-72 flex-col gap-6 border-r p-6">
         <h1 className="text-xl font-bold">Pendulum simulation</h1>
+        <ConnectionBadge connection={connection} />
         <StatusBadge status={status} />
         <Controls status={status} onStart={start} onPause={pause} onStop={stop} />
         {state && (

@@ -6,6 +6,9 @@ export type Command = "start" | "pause" | "stop";
 
 export async function fetchState(): Promise<ServerState> {
   const response = await fetch(`${SERVER_URL}/state`);
+  if (!response.ok) {
+    throw new Error(`State request failed (${response.status})`);
+  }
   return response.json();
 }
 
