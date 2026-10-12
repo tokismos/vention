@@ -11,4 +11,7 @@ export type PendulumConfig = {
   mass: number;
 };
 
-export type ServerState = PendulumState & { status: Status };
+export type ServerState = PendulumState & {
+  status: Status;
+  config: PendulumConfig;
+};

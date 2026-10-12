@@ -3,7 +3,8 @@ import { step, initialState, DEFAULT_CONFIG } from "@/core";
 
 const DT = 1 / 60;
 
-export function createSimulation(config: PendulumConfig = DEFAULT_CONFIG) {
+export function createSimulation(initialConfig: PendulumConfig = DEFAULT_CONFIG) {
+  let config = initialConfig;
   let state: PendulumState = initialState(config);
   let status: Status = "stopped";
   let timer: NodeJS.Timeout | undefined;
@@ -30,9 +31,16 @@ export function createSimulation(config: PendulumConfig = DEFAULT_CONFIG) {
     state = initialState(config);
   }
 
-  function getState(): ServerState {
-    return { status, ...state };
+  function setConfig(change: Partial<PendulumConfig>): boolean {
+    if (status !== "stopped") return false;
+    config = { ...config, ...change };
+    state = initialState(config);
+    return true;
   }
 
-  return { start, pause, stop, tick, getState };
+  function getState(): ServerState {
+    return { status, config, ...state };
+  }
+
+  return { start, pause, stop, tick, setConfig, getState };
 }

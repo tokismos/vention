@@ -2,7 +2,7 @@ import { useSimulation } from "@/hooks";
 import { Controls, ConfigPanel, PendulumView, StatusBadge } from "@/components";
 
 export default function App() {
-  const { config, state, status, start, pause, stop, updateConfig } = useSimulation();
+  const { state, status, start, pause, stop, updateConfig } = useSimulation();
 
   return (
     <div className="flex min-h-screen">
@@ -10,10 +10,14 @@ export default function App() {
         <h1 className="text-xl font-bold">Pendulum simulation</h1>
         <StatusBadge status={status} />
         <Controls status={status} onStart={start} onPause={pause} onStop={stop} />
-        <ConfigPanel config={config} disabled={status !== "stopped"} onChange={updateConfig} />
+        {state && (
+          <ConfigPanel config={state.config} disabled={status !== "stopped"} onChange={updateConfig} />
+        )}
       </aside>
       <main className="flex-1 p-6">
-        {state && <PendulumView angle={state.angle} length={config.length} mass={config.mass} />}
+        {state && (
+          <PendulumView angle={state.angle} length={state.config.length} mass={state.config.mass} />
+        )}
       </main>
     </div>
   );

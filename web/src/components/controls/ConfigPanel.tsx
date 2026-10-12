@@ -14,7 +14,7 @@ export function ConfigPanel({ config, disabled, onChange }: Props) {
         disabled={disabled} onChange={(v) => onChange({ angleDeg: v })} />
       <Slider label="Length (m)" value={config.length} min={0.5} max={3} step={0.1}
         disabled={disabled} onChange={(v) => onChange({ length: v })} />
-      <Slider label="Mass (kg)" value={config.mass} min={0.5} max={5} step={0.5}
+      <Slider label="Mass (kg)" value={config.mass} min={0.5} max={7} step={0.5}
         disabled={disabled} onChange={(v) => onChange({ mass: v })} />
     </section>
   );

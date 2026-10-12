@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import type { PendulumConfig, ServerState } from "@shared";
-import { fetchState, sendCommand, type Command } from "@/api";
+import { fetchState, sendCommand, sendConfig, type Command } from "@/api";
 
 const POLL_MS = 50;
-const DEFAULT_CONFIG: PendulumConfig = { angleDeg: 30, length: 2, mass: 1 };
 
 export function useSimulation() {
-  const [config, setConfig] = useState<PendulumConfig>(DEFAULT_CONFIG);
   const [state, setState] = useState<ServerState | null>(null);
 
   useEffect(() => {
@@ -31,12 +29,15 @@ export function useSimulation() {
     }
   }
 
-  function updateConfig(change: Partial<PendulumConfig>) {
-    setConfig({ ...config, ...change });
+  async function updateConfig(change: Partial<PendulumConfig>) {
+    try {
+      setState(await sendConfig(change));
+    } catch {
+      // Refused or unreachable: the next poll shows the server's real config.
+    }
   }
 
   return {
-    config,
     state,
     status: state?.status ?? "stopped",
     start: () => run("start"),
