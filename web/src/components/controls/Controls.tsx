@@ -1,4 +1,4 @@
-import type { Status } from "@/hooks";
+import type { Status } from "@shared";
 
 const BUTTON = "flex-1 rounded border px-3 py-1 disabled:opacity-40";
 

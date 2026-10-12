@@ -1,10 +1,4 @@
-import type { PendulumState } from "./physics";
-
-export type PendulumConfig = {
-  angleDeg: number;
-  length: number;
-  mass: number;
-};
+import type { PendulumConfig, PendulumState } from "@shared";
 
 export const DEFAULT_CONFIG: PendulumConfig = { angleDeg: 30, length: 2, mass: 1 };
 

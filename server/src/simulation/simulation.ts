@@ -1,11 +1,5 @@
-import {
-  step,
-  initialState,
-  DEFAULT_CONFIG,
-  type PendulumConfig,
-  type PendulumState,
-  type Status,
-} from "@/core";
+import type { PendulumConfig, PendulumState, ServerState, Status } from "@shared";
+import { step, initialState, DEFAULT_CONFIG } from "@/core";
 
 const DT = 1 / 60;
 
@@ -36,7 +30,7 @@ export function createSimulation(config: PendulumConfig = DEFAULT_CONFIG) {
     state = initialState(config);
   }
 
-  function getState() {
+  function getState(): ServerState {
     return { status, ...state };
   }
 

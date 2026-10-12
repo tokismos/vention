@@ -1,4 +1,4 @@
-import type { Status } from "@/hooks";
+import type { Status } from "@shared";
 
 type Props = {
   status: Status;

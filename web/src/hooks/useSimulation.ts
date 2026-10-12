@@ -1,41 +1,47 @@
 import { useEffect, useState } from "react";
-import { step, DEFAULT_CONFIG, initialState, type PendulumState, type PendulumConfig } from "@/core";
+import type { PendulumConfig, ServerState } from "@shared";
+import { fetchState, sendCommand, type Command } from "@/api";
 
-const DT = 1 / 60;
-
-export type Status = "running" | "paused" | "stopped";
+const POLL_MS = 50;
+const DEFAULT_CONFIG: PendulumConfig = { angleDeg: 30, length: 2, mass: 1 };
 
 export function useSimulation() {
   const [config, setConfig] = useState<PendulumConfig>(DEFAULT_CONFIG);
-  const [state, setState] = useState<PendulumState>(initialState(DEFAULT_CONFIG));
-  const [status, setStatus] = useState<Status>("stopped");
+  const [state, setState] = useState<ServerState | null>(null);
 
   useEffect(() => {
-    if (status !== "running") return;
-    const id = setInterval(() => {
-      setState((s) => step(s, config.length, DT));
-    }, DT * 1000);
+    async function poll() {
+      try {
+        setState(await fetchState());
+      } catch {
+        // Server unreachable: keep showing the last known state.
+      }
+    }
+
+    poll();
+    const id = setInterval(poll, POLL_MS);
     return () => clearInterval(id);
-  }, [status, config.length]);
+  }, []);
+
+  async function run(command: Command) {
+    try {
+      setState(await sendCommand(command));
+    } catch {
+      // Server unreachable: nothing to update.
+    }
+  }
 
   function updateConfig(change: Partial<PendulumConfig>) {
-    const next = { ...config, ...change };
-    setConfig(next);
-    setState(initialState(next));
+    setConfig({ ...config, ...change });
   }
 
-  function start() {
-    setStatus("running");
-  }
-
-  function pause() {
-    setStatus("paused");
-  }
-
-  function stop() {
-    setStatus("stopped");
-    setState(initialState(config));
-  }
-
-  return { config, state, status, start, pause, stop, updateConfig };
+  return {
+    config,
+    state,
+    status: state?.status ?? "stopped",
+    start: () => run("start"),
+    pause: () => run("pause"),
+    stop: () => run("stop"),
+    updateConfig,
+  };
 }

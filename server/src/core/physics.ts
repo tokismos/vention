@@ -1,9 +1,6 @@
-const GRAVITY = 9.81;
+import type { PendulumState } from "@shared";
 
-export type PendulumState = {
-  angle: number;
-  velocity: number;
-};
+const GRAVITY = 9.81;
 
 export function step(state: PendulumState, length: number, dt: number): PendulumState {
   const acceleration = -(GRAVITY / length) * Math.sin(state.angle);

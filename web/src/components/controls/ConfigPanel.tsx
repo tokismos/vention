@@ -1,4 +1,4 @@
-import type { PendulumConfig } from "@/core";
+import type { PendulumConfig } from "@shared";
 import { Slider } from "./Slider";
 
 type Props = {

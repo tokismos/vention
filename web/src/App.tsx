@@ -13,7 +13,7 @@ export default function App() {
         <ConfigPanel config={config} disabled={status !== "stopped"} onChange={updateConfig} />
       </aside>
       <main className="flex-1 p-6">
-        <PendulumView angle={state.angle} length={config.length} mass={config.mass} />
+        {state && <PendulumView angle={state.angle} length={config.length} mass={config.mass} />}
       </main>
     </div>
   );
