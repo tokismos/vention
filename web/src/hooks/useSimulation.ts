@@ -11,9 +11,7 @@ export function useSimulation() {
     async function poll() {
       try {
         setState(await fetchState());
-      } catch {
-        // Server unreachable: keep showing the last known state.
-      }
+      } catch {}
     }
 
     poll();
@@ -24,17 +22,13 @@ export function useSimulation() {
   async function run(command: Command) {
     try {
       setState(await sendCommand(command));
-    } catch {
-      // Server unreachable: nothing to update.
-    }
+    } catch {}
   }
 
   async function updateConfig(change: Partial<PendulumConfig>) {
     try {
       setState(await sendConfig(change));
-    } catch {
-      // Refused or unreachable: the next poll shows the server's real config.
-    }
+    } catch {}
   }
 
   return {

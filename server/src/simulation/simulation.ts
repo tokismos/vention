@@ -1,7 +1,12 @@
 import type { PendulumConfig, PendulumState, ServerState, Status } from "@shared";
-import { step, initialState, DEFAULT_CONFIG } from "@/core";
+import { step } from "@/physics";
 
 const DT = 1 / 60;
+const DEFAULT_CONFIG: PendulumConfig = { angleDeg: 30, length: 2, mass: 1 };
+
+function initialState(config: PendulumConfig): PendulumState {
+  return { angle: (config.angleDeg * Math.PI) / 180, velocity: 0 };
+}
 
 export function createSimulation(initialConfig: PendulumConfig = DEFAULT_CONFIG) {
   let config = initialConfig;
@@ -44,3 +49,5 @@ export function createSimulation(initialConfig: PendulumConfig = DEFAULT_CONFIG)
 
   return { start, pause, stop, tick, setConfig, getState };
 }
+
+export type Simulation = ReturnType<typeof createSimulation>;
