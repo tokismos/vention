@@ -35,6 +35,7 @@ export function useSimulation() {
 
   return {
     state,
+    config: state?.config,
     connection: CONNECTION[queryStatus],
     error: (commandError ?? configError)?.message ?? null,
     status: state?.status ?? "stopped",

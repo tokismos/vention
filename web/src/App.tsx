@@ -2,7 +2,7 @@ import { useSimulation } from "@/hooks";
 import { Controls, ConfigPanel, ConnectionBadge, PendulumView, StatusBadge } from "@/components";
 
 export default function App() {
-  const { state, connection, error, status, isLoading, start, pause, stop, updateConfig } =
+  const { state, config, connection, error, status, isLoading, start, pause, stop, updateConfig } =
     useSimulation();
 
   return (
@@ -13,8 +13,8 @@ export default function App() {
         <StatusBadge status={status} />
         <Controls status={status} onStart={start} onPause={pause} onStop={stop} />
         {error && <p className="text-sm text-red-600">{error}</p>}
-        {state && (
-          <ConfigPanel config={state.config} disabled={status !== "stopped"} onChange={updateConfig} />
+        {config && (
+          <ConfigPanel config={config} disabled={status !== "stopped"} onChange={updateConfig} />
         )}
       </aside>
       <main className="flex-1 p-6">
