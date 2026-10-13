@@ -2,7 +2,8 @@ import { useSimulation } from "@/hooks";
 import { Controls, ConfigPanel, ConnectionBadge, PendulumView, StatusBadge } from "@/components";
 
 export default function App() {
-  const { state, connection, error, status, start, pause, stop, updateConfig } = useSimulation();
+  const { state, connection, error, status, isLoading, start, pause, stop, updateConfig } =
+    useSimulation();
 
   return (
     <div className="flex min-h-screen">
@@ -17,6 +18,7 @@ export default function App() {
         )}
       </aside>
       <main className="flex-1 p-6">
+        {isLoading && <p>Loading…</p>}
         {state && (
           <PendulumView angle={state.angle} length={state.config.length} mass={state.config.mass} />
         )}

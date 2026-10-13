@@ -1,53 +1,44 @@
-import { useEffect, useState } from "react";
-import type { PendulumConfig, ServerState } from "@shared";
-import { fetchState, getErrorMessage, sendCommand, sendConfig, type Command } from "@/api";
+import { useMutation, useQuery, useQueryClient, type QueryStatus } from "@tanstack/react-query";
+import type { ServerState } from "@shared";
+import { fetchState, sendCommand, sendConfig } from "@/api";
 import type { Connection } from "@/types";
 
 const POLL_MS = 50;
+const STATE_KEY = ["state"];
+
+const CONNECTION: Record<QueryStatus, Connection> = {
+  pending: "connecting",
+  error: "offline",
+  success: "online",
+};
 
 export function useSimulation() {
-  const [state, setState] = useState<ServerState | null>(null);
-  const [connection, setConnection] = useState<Connection>("connecting");
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const saveState = (state: ServerState) => queryClient.setQueryData(STATE_KEY, state);
 
-  useEffect(() => {
-    async function poll() {
-      try {
-        setState(await fetchState());
-        setConnection("online");
-      } catch {
-        setConnection("offline");
-      }
-    }
+  const { data: state, status: queryStatus } = useQuery({
+    queryKey: STATE_KEY,
+    queryFn: fetchState,
+    refetchInterval: POLL_MS,
+    retry: false,
+  });
 
-    poll();
-    const id = setInterval(poll, POLL_MS);
-    return () => clearInterval(id);
-  }, []);
+  const { mutate: run, error: commandError } = useMutation({
+    mutationFn: sendCommand,
+    onSuccess: saveState,
+  });
 
-  async function run(command: Command) {
-    try {
-      setState(await sendCommand(command));
-      setError(null);
-    } catch (e) {
-      setError(getErrorMessage(e));
-    }
-  }
-
-  async function updateConfig(change: Partial<PendulumConfig>) {
-    try {
-      setState(await sendConfig(change));
-      setError(null);
-    } catch (e) {
-      setError(getErrorMessage(e));
-    }
-  }
+  const { mutate: updateConfig, error: configError } = useMutation({
+    mutationFn: sendConfig,
+    onSuccess: saveState,
+  });
 
   return {
     state,
-    connection,
-    error,
+    connection: CONNECTION[queryStatus],
+    error: (commandError ?? configError)?.message ?? null,
     status: state?.status ?? "stopped",
+    isLoading: queryStatus === "pending",
     start: () => run("start"),
     pause: () => run("pause"),
     stop: () => run("stop"),
