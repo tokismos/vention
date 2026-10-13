@@ -29,6 +29,18 @@ describe("createSimulation", () => {
     expect(simulation.getState().angle).toBe(angleAtPause);
   });
 
+  it("continues from where it was paused", () => {
+    const simulation = createSimulation();
+
+    simulation.start();
+    vi.advanceTimersByTime(1000);
+    simulation.pause();
+    const { angle, velocity } = simulation.getState();
+    simulation.start();
+
+    expect(simulation.getState()).toMatchObject({ angle, velocity });
+  });
+
   it("goes back to its starting position when stopped", () => {
     const simulation = createSimulation();
     const startState = simulation.getState();
