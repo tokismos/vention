@@ -1,18 +1,18 @@
+import { LIMITS } from "@shared";
 import type { ServerState } from "@shared";
 
-const BAR_LENGTH = 10;
-const MAX_LENGTH = 3;
-const MAX_MASS = 5;
+const BAR_START = LIMITS.anchorX.min;
+const BAR_LENGTH = LIMITS.anchorX.max - LIMITS.anchorX.min;
 const MAX_BALL_RADIUS = 0.3;
 const PADDING = 0.2;
 const TOP_SPACE = 0.3;
 const BAR_HEIGHT = 0.15;
 const ANCHOR_Y = TOP_SPACE + BAR_HEIGHT;
-const REACH = MAX_LENGTH + MAX_BALL_RADIUS + PADDING;
-const VIEW_BOX = [-REACH, 0, BAR_LENGTH + 2 * REACH, ANCHOR_Y + REACH].join(" ");
+const REACH = LIMITS.length.max + MAX_BALL_RADIUS + PADDING;
+const VIEW_BOX = [BAR_START - REACH, 0, BAR_LENGTH + 2 * REACH, ANCHOR_Y + REACH].join(" ");
 
 function ballRadius(mass: number): number {
-  return MAX_BALL_RADIUS * Math.cbrt(mass / MAX_MASS);
+  return MAX_BALL_RADIUS * Math.cbrt(mass / LIMITS.mass.max);
 }
 
 type Props = {
@@ -22,7 +22,7 @@ type Props = {
 export function PendulumScene({ pendulums }: Props) {
   return (
     <svg viewBox={VIEW_BOX} className="w-full">
-      <rect x={0} y={TOP_SPACE} width={BAR_LENGTH} height={BAR_HEIGHT} fill="gray" />
+      <rect x={BAR_START} y={TOP_SPACE} width={BAR_LENGTH} height={BAR_HEIGHT} fill="gray" />
       {pendulums.map(({ id, angle, config }) => {
         const x = config.anchorX + config.length * Math.sin(angle);
         const y = ANCHOR_Y + config.length * Math.cos(angle);

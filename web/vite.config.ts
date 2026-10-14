@@ -23,7 +23,10 @@ function pendulumProxy(id: number): [string, ProxyOptions] {
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()],
   resolve: {
-    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+    alias: {
+      "@shared": fileURLToPath(new URL("../shared/index.ts", import.meta.url)),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
   },
   server: {
     proxy: Object.fromEntries(ids.map(pendulumProxy)),

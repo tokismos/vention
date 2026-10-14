@@ -26,8 +26,9 @@
 - A type that describes a function's input or output stays next to that function and is exported with it (e.g. `Command` with `sendCommand` in `api/`, `Simulation` with `createSimulation`).
 - Any other type used by several files of one app goes in that app's `types/` folder (e.g. `web/src/types/connection.ts`). Never import a type from a hook or component file.
 - Types used by both `web/` and `server/` live once in `shared/types.ts`. Never copy a type between the two apps.
-- Import shared types with `import type { Status } from "@shared"`. Always `import type`.
-- `shared/` holds types only, no values or functions. Type imports are removed at build time, so Vite never loads files outside `web/`. That is why `@shared` is only in the `paths` of `web/tsconfig.app.json` and `server/tsconfig.json`, not in `vite.config.ts`.
+- Constant values used by both apps live once in `shared/` too (e.g. `LIMITS` in `shared/limits.ts`, used by the server validation, the sliders and the drawing). Never copy a value between the two apps.
+- Import shared types with `import type { Status } from "@shared"`, and shared values with a normal import: `import { LIMITS } from "@shared"`.
+- Shared values are real code, so every tool must find `@shared`. It is set in four places that must stay in sync: `paths` in `web/tsconfig.app.json` and `server/tsconfig.json`, and `resolve.alias` in `web/vite.config.ts` and `server/vitest.config.ts`.
 
 ## React
 
