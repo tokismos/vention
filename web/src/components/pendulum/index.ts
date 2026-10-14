@@ -1,1 +1,1 @@
-export { PendulumView } from "./PendulumView";
+export { PendulumScene } from "./PendulumScene";

@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import App from "@/App";
 
 const server = setupServer();
@@ -12,14 +12,25 @@ beforeAll(() => server.listen());
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  vi.unstubAllEnvs();
 });
 afterAll(() => server.close());
 
-function pendulumState({ status, angle = 0 }: { status: Status; angle?: number }): ServerState {
+function pendulumState({
+  id = 1,
+  status,
+  angle = 0,
+  anchorX = 1,
+}: {
+  id?: number;
+  status: Status;
+  angle?: number;
+  anchorX?: number;
+}): ServerState {
   return {
-    id: 1,
+    id,
     status,
-    config: { angleDeg: 30, length: 2, mass: 1, anchorX: 1 },
+    config: { angleDeg: 30, length: 2, mass: 1, anchorX },
     angle,
     velocity: 0,
   };
@@ -75,5 +86,20 @@ describe("App", () => {
     const firstX = ballX();
 
     await waitFor(() => expect(ballX()).not.toBe(firstX));
+  });
+
+  it("draws the pendulum of every server at its own anchor", async () => {
+    vi.stubEnv("VITE_PENDULUM_COUNT", "3");
+    server.use(
+      http.get("*/api/:id/state", ({ params }) => {
+        const id = Number(params.id);
+        return HttpResponse.json(pendulumState({ id, anchorX: id, status: "stopped" }));
+      }),
+    );
+    const { container } = renderApp();
+    const ballsX = () =>
+      [...container.querySelectorAll("circle")].map((ball) => ball.getAttribute("cx"));
+
+    await waitFor(() => expect(ballsX()).toEqual(["1", "2", "3"]));
   });
 });
