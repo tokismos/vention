@@ -9,7 +9,7 @@
 - Use alias imports with `@/` (points to the app's own `src/`: `web/src/` or `server/src/`) for anything outside the current folder: `import { step } from "@/physics"`. Never use `../`.
 - Use `./` only for files in the same folder (inside `index.ts`, or e.g. `ConfigPanel` importing `./Slider`).
 - In `web/`, the `@/` alias is set in two places that must stay in sync: `paths` in `web/tsconfig.app.json` and `resolve.alias` in `web/vite.config.ts`.
-- In `server/`, the `@/` alias is set only in `paths` in `server/tsconfig.json` (`tsx` reads it).
+- In `server/`, the `@/` alias is set in two places that must stay in sync: `paths` in `server/tsconfig.json` (`tsx` reads it) and `resolve.alias` in `server/vitest.config.ts`.
 
 ## Folders
 
@@ -30,3 +30,17 @@
 ## React
 
 - Destructure what a hook returns: `const { status, start } = useSimulation()`, not `const sim = useSimulation()`.
+
+## Pull requests
+
+- Never run any git or `gh` command that changes something (add, commit, branch, checkout, merge, push, opening or merging a PR). The user is responsible for all of them. Only suggest the commands and the texts (titles, descriptions). Read-only commands like `git status`, `git diff` and `git log` are fine.
+- PR titles and commit titles follow Conventional Commits: `type(scope): what it does`.
+  - `type`: `feat` (new for the user), `fix` (repairs something broken), `refactor` (same behavior, better code), `test`, `chore` (tooling), `ci`, `docs`.
+  - `scope`: `web` or `server` when only one app changes. No scope when both change: `feat: add wind to the simulation`.
+  - Imperative mood ("add", not "added"), under about 60 characters, no period at the end.
+- Branch names: `type/short-name` with the same type as the title, e.g. `test/web-tests`, `fix/validation-error-format`.
+- PR descriptions are concise, with three parts:
+  - `Why`: the problem, in one or two sentences.
+  - `What changed`: one short line per change.
+  - `How to test`: the steps or command that shows it works.
+- Merge with "Create a merge commit", not squash or rebase, so stacked PRs keep their original commits.
