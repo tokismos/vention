@@ -8,14 +8,22 @@ function initialState(config: PendulumConfig): PendulumState {
   return { angle: (config.angleDeg * Math.PI) / 180, velocity: 0 };
 }
 
-export function createSimulation(id: number, initialConfig: PendulumConfig = DEFAULT_CONFIG) {
+export type SimulationOptions = {
+  id: number;
+  config?: PendulumConfig;
+};
+
+export function createSimulation({
+  id,
+  config: initialConfig = DEFAULT_CONFIG,
+}: SimulationOptions) {
   let config = initialConfig;
   let state: PendulumState = initialState(config);
   let status: Status = "stopped";
   let timer: NodeJS.Timeout | undefined;
 
   function tick() {
-    state = step(state, config.length, DT);
+    state = step({ state, length: config.length, dt: DT });
   }
 
   function start() {

@@ -15,12 +15,12 @@ describe("step", () => {
     let state: PendulumState = { angle: toRadians(30), velocity: 0 };
 
     for (let i = 0; i < TEN_MINUTES; i++) {
-      state = step(state, LENGTH, DT);
+      state = step({ state, length: LENGTH, dt: DT });
     }
 
     let highestAngle = 0;
     for (let i = 0; i < FIVE_SECONDS; i++) {
-      state = step(state, LENGTH, DT);
+      state = step({ state, length: LENGTH, dt: DT });
       highestAngle = Math.max(highestAngle, toDegrees(state.angle));
     }
 

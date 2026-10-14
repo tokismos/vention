@@ -4,6 +4,6 @@ import { createSimulation } from "@/simulation";
 
 const { pendulumId, port } = loadConfig(process.env);
 
-createApp(createSimulation(pendulumId)).listen(port, () => {
+createApp(createSimulation({ id: pendulumId })).listen(port, () => {
   console.log(`Pendulum ${pendulumId} on http://localhost:${port}`);
 });
