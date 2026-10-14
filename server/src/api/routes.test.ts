@@ -3,9 +3,19 @@ import { describe, expect, it, onTestFinished } from "vitest";
 import { createApp } from "@/api";
 import { createSimulation } from "@/simulation";
 
+describe("GET /state", () => {
+  it("says which pendulum answers", async () => {
+    const app = createApp(createSimulation(3));
+
+    const response = await request(app).get("/state");
+
+    expect(response.body.id).toBe(3);
+  });
+});
+
 describe("POST /config", () => {
   it("accepts a valid change while the pendulum is stopped", async () => {
-    const app = createApp(createSimulation());
+    const app = createApp(createSimulation(1));
 
     const response = await request(app).post("/config").send({ angleDeg: 45 });
 
@@ -19,7 +29,7 @@ describe("POST /config", () => {
     { reason: "a length sent as text", settings: { length: "2" } },
     { reason: "an unknown setting", settings: { gravity: 5 } },
   ])("refuses $reason", async ({ settings }) => {
-    const app = createApp(createSimulation());
+    const app = createApp(createSimulation(1));
 
     const response = await request(app).post("/config").send(settings);
 
@@ -28,7 +38,7 @@ describe("POST /config", () => {
   });
 
   it("refuses a change while the pendulum is running", async () => {
-    const simulation = createSimulation();
+    const simulation = createSimulation(1);
     onTestFinished(() => simulation.stop());
     const app = createApp(simulation);
 

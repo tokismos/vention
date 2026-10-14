@@ -8,7 +8,7 @@ function initialState(config: PendulumConfig): PendulumState {
   return { angle: (config.angleDeg * Math.PI) / 180, velocity: 0 };
 }
 
-export function createSimulation(initialConfig: PendulumConfig = DEFAULT_CONFIG) {
+export function createSimulation(id: number, initialConfig: PendulumConfig = DEFAULT_CONFIG) {
   let config = initialConfig;
   let state: PendulumState = initialState(config);
   let status: Status = "stopped";
@@ -44,7 +44,7 @@ export function createSimulation(initialConfig: PendulumConfig = DEFAULT_CONFIG)
   }
 
   function getState(): ServerState {
-    return { status, config, ...state };
+    return { id, status, config, ...state };
   }
 
   return { start, pause, stop, tick, setConfig, getState };

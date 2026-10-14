@@ -18,7 +18,7 @@ afterEach(() => {
 afterAll(() => server.close());
 
 function pendulumState(status: Status, angle = 0): ServerState {
-  return { status, config: { angleDeg: 30, length: 2, mass: 1 }, angle, velocity: 0 };
+  return { id: 1, status, config: { angleDeg: 30, length: 2, mass: 1 }, angle, velocity: 0 };
 }
 
 function serverReturns(status: Status) {

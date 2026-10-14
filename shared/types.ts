@@ -12,6 +12,7 @@ export type PendulumConfig = {
 };
 
 export type ServerState = PendulumState & {
+  id: number;
   status: Status;
   config: PendulumConfig;
 };

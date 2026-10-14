@@ -6,8 +6,8 @@ describe("createSimulation", () => {
   afterEach(() => vi.useRealTimers());
 
   it("does not swing faster when Start is pressed twice", () => {
-    const pressedOnce = createSimulation();
-    const pressedTwice = createSimulation();
+    const pressedOnce = createSimulation(1);
+    const pressedTwice = createSimulation(1);
 
     pressedOnce.start();
     pressedTwice.start();
@@ -18,7 +18,7 @@ describe("createSimulation", () => {
   });
 
   it("freezes the pendulum when paused", () => {
-    const simulation = createSimulation();
+    const simulation = createSimulation(1);
 
     simulation.start();
     vi.advanceTimersByTime(1000);
@@ -30,7 +30,7 @@ describe("createSimulation", () => {
   });
 
   it("continues from where it was paused", () => {
-    const simulation = createSimulation();
+    const simulation = createSimulation(1);
 
     simulation.start();
     vi.advanceTimersByTime(1000);
@@ -42,7 +42,7 @@ describe("createSimulation", () => {
   });
 
   it("goes back to its starting position when stopped", () => {
-    const simulation = createSimulation();
+    const simulation = createSimulation(1);
     const startState = simulation.getState();
 
     simulation.start();

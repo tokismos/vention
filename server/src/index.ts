@@ -2,8 +2,8 @@ import { createApp } from "@/api";
 import { loadConfig } from "@/config";
 import { createSimulation } from "@/simulation";
 
-const { port } = loadConfig(process.env);
+const { pendulumId, port } = loadConfig(process.env);
 
-createApp(createSimulation()).listen(port, () => {
-  console.log(`Pendulum server on http://localhost:${port}`);
+createApp(createSimulation(pendulumId)).listen(port, () => {
+  console.log(`Pendulum ${pendulumId} on http://localhost:${port}`);
 });
