@@ -32,7 +32,7 @@ export function ConfigPanel({ config, disabled, onChange }: Props) {
         label="Mass (kg)"
         value={config.mass}
         min={0.5}
-        max={7}
+        max={5}
         step={0.5}
         disabled={disabled}
         onChange={(v) => onChange({ mass: v })}
