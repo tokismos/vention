@@ -6,8 +6,6 @@ import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import App from "@/App";
 
-const CORS = { "Access-Control-Allow-Origin": "*" };
-
 const server = setupServer();
 
 beforeAll(() => server.listen());
@@ -28,11 +26,7 @@ function pendulumState({ status, angle = 0 }: { status: Status; angle?: number }
 }
 
 function serverReturns(status: Status) {
-  server.use(
-    http.get("*/api/1/state", () =>
-      HttpResponse.json(pendulumState({ status }), { headers: CORS }),
-    ),
-  );
+  server.use(http.get("*/api/1/state", () => HttpResponse.json(pendulumState({ status }))));
 }
 
 function serverSwings() {
@@ -40,7 +34,7 @@ function serverSwings() {
   server.use(
     http.get("*/api/1/state", () => {
       angle -= 0.1;
-      return HttpResponse.json(pendulumState({ status: "running", angle }), { headers: CORS });
+      return HttpResponse.json(pendulumState({ status: "running", angle }));
     }),
   );
 }
