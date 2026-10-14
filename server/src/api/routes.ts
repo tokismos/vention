@@ -35,7 +35,7 @@ export function createRouter(simulation: Simulation) {
   router.post("/config", (req, res) => {
     const result = ConfigChangeSchema.safeParse(req.body);
     if (!result.success) {
-      res.status(400).json(z.flattenError(result.error));
+      res.status(400).json({ error: z.prettifyError(result.error) });
       return;
     }
 
