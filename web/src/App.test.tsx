@@ -29,14 +29,16 @@ function pendulumState({ status, angle = 0 }: { status: Status; angle?: number }
 
 function serverReturns(status: Status) {
   server.use(
-    http.get("*/state", () => HttpResponse.json(pendulumState({ status }), { headers: CORS })),
+    http.get("*/api/1/state", () =>
+      HttpResponse.json(pendulumState({ status }), { headers: CORS }),
+    ),
   );
 }
 
 function serverSwings() {
   let angle = 0.5;
   server.use(
-    http.get("*/state", () => {
+    http.get("*/api/1/state", () => {
       angle -= 0.1;
       return HttpResponse.json(pendulumState({ status: "running", angle }), { headers: CORS });
     }),

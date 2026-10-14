@@ -1,9 +1,11 @@
 import { useSimulation } from "@/hooks";
 import { Controls, ConfigPanel, ConnectionBadge, PendulumView, StatusBadge } from "@/components";
 
+const FIRST_PENDULUM_ID = 1;
+
 export default function App() {
   const { state, config, connection, error, status, isLoading, start, pause, stop, updateConfig } =
-    useSimulation();
+    useSimulation(FIRST_PENDULUM_ID);
 
   return (
     <div className="flex min-h-screen">

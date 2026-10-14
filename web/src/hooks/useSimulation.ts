@@ -1,10 +1,9 @@
 import { useMutation, useQuery, useQueryClient, type QueryStatus } from "@tanstack/react-query";
-import type { ServerState } from "@shared";
+import type { PendulumConfig, ServerState } from "@shared";
 import { fetchState, sendCommand, sendConfig } from "@/api";
 import type { Connection } from "@/types";
 
 const POLL_MS = 50;
-const STATE_KEY = ["state"];
 
 const CONNECTION: Record<QueryStatus, Connection> = {
   pending: "connecting",
@@ -12,13 +11,14 @@ const CONNECTION: Record<QueryStatus, Connection> = {
   success: "online",
 };
 
-export function useSimulation() {
+export function useSimulation(id: number) {
   const queryClient = useQueryClient();
-  const saveState = (state: ServerState) => queryClient.setQueryData(STATE_KEY, state);
+  const stateKey = ["state", id];
+  const saveState = (state: ServerState) => queryClient.setQueryData(stateKey, state);
 
   const { data: state, status: queryStatus } = useQuery({
-    queryKey: STATE_KEY,
-    queryFn: fetchState,
+    queryKey: stateKey,
+    queryFn: () => fetchState(id),
     refetchInterval: POLL_MS,
     retry: false,
   });
@@ -28,7 +28,7 @@ export function useSimulation() {
     onSuccess: saveState,
   });
 
-  const { mutate: updateConfig, error: configError } = useMutation({
+  const { mutate: saveConfig, error: configError } = useMutation({
     mutationFn: sendConfig,
     onSuccess: saveState,
   });
@@ -40,9 +40,9 @@ export function useSimulation() {
     error: (commandError ?? configError)?.message ?? null,
     status: state?.status ?? "stopped",
     isLoading: queryStatus === "pending",
-    start: () => run("start"),
-    pause: () => run("pause"),
-    stop: () => run("stop"),
-    updateConfig,
+    start: () => run({ id, command: "start" }),
+    pause: () => run({ id, command: "pause" }),
+    stop: () => run({ id, command: "stop" }),
+    updateConfig: (change: Partial<PendulumConfig>) => saveConfig({ id, change }),
   };
 }

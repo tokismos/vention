@@ -11,7 +11,8 @@ function pendulumCount(): number {
   return count;
 }
 
-const ids = Array.from({ length: pendulumCount() }, (_, index) => index + 1);
+const count = pendulumCount();
+const ids = Array.from({ length: count }, (_, index) => index + 1);
 
 const pendulums = ids.map((id) => ({
   name: `pendulum-${id}`,
@@ -19,7 +20,11 @@ const pendulums = ids.map((id) => ({
   env: { PENDULUM_ID: String(id) },
 }));
 
-const web = { name: "web", command: "npm run --silent dev --workspace web" };
+const web = {
+  name: "web",
+  command: "npm run --silent dev --workspace web",
+  env: { PENDULUM_COUNT: String(count) },
+};
 
 const { result } = concurrently([...pendulums, web], { prefix: "name" });
 
