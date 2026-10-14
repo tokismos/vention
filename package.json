@@ -6,18 +6,26 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm test --prefix server && npm test --prefix web",
-    "typecheck": "npm run typecheck --prefix server",
-    "build": "npm run build --prefix web"
+    "test": "vitest run",
+    "typecheck": "npm run typecheck --workspace server",
+    "build": "npm run build --workspace web",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vitest/ui": "^5.0.4",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
     "prettier": "^3.9.10",
-    "typescript-eslint": "^8.71.2"
-  }
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.4"
+  },
+  "workspaces": [
+    "server",
+    "web"
+  ]
 }
