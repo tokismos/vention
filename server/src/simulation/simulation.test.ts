@@ -51,4 +51,10 @@ describe("createSimulation", () => {
 
     expect(simulation.getState()).toEqual(startState);
   });
+
+  it("hangs each pendulum 1 m to the right of the previous one", () => {
+    const anchors = [1, 2, 3].map((id) => createSimulation({ id }).getState().config.anchorX);
+
+    expect(anchors).toEqual([1, 2, 3]);
+  });
 });

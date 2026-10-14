@@ -9,6 +9,7 @@ export type PendulumConfig = {
   angleDeg: number;
   length: number;
   mass: number;
+  anchorX: number;
 };
 
 export type ServerState = PendulumState & {

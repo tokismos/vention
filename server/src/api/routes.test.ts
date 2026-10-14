@@ -24,9 +24,19 @@ describe("POST /config", () => {
     expect(response.body.angle).toBeCloseTo(Math.PI / 4);
   });
 
+  it("moves the anchor while the pendulum is stopped", async () => {
+    const app = createApp(createSimulation({ id: 1 }));
+
+    const response = await request(app).post("/config").send({ anchorX: 4.5 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.config.anchorX).toBe(4.5);
+  });
+
   it.each([
     { reason: "a length above 3", settings: { length: 10 } },
     { reason: "a length sent as text", settings: { length: "2" } },
+    { reason: "an anchor off the bar", settings: { anchorX: 11 } },
     { reason: "an unknown setting", settings: { gravity: 5 } },
   ])("refuses $reason", async ({ settings }) => {
     const app = createApp(createSimulation({ id: 1 }));

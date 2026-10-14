@@ -2,7 +2,11 @@ import type { PendulumConfig, PendulumState, ServerState, Status } from "@shared
 import { step } from "@/physics";
 
 const DT = 1 / 60;
-const DEFAULT_CONFIG: PendulumConfig = { angleDeg: 30, length: 2, mass: 1 };
+const ANCHOR_SPACING = 1;
+
+function defaultConfig(id: number): PendulumConfig {
+  return { angleDeg: 30, length: 2, mass: 1, anchorX: id * ANCHOR_SPACING };
+}
 
 function initialState(config: PendulumConfig): PendulumState {
   return { angle: (config.angleDeg * Math.PI) / 180, velocity: 0 };
@@ -15,7 +19,7 @@ export type SimulationOptions = {
 
 export function createSimulation({
   id,
-  config: initialConfig = DEFAULT_CONFIG,
+  config: initialConfig = defaultConfig(id),
 }: SimulationOptions) {
   let config = initialConfig;
   let state: PendulumState = initialState(config);
