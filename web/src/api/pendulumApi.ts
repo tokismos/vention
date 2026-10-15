@@ -1,7 +1,6 @@
 import type { PendulumConfig, ServerState } from "@shared";
 import { http } from "./axios";
-
-export type Command = "start" | "pause" | "stop";
+import type { Command } from "./types";
 
 export type CommandInput = {
   id: number;

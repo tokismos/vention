@@ -4,7 +4,7 @@
 
 - Never add comments in code. Names and small functions should explain the code.
 - A function with two or more parameters takes one object instead, so every call names its values: `createSimulation({ id: 3 })`, `step({ state, length, dt })`. A function with one obvious parameter keeps it plain: `loadConfig(process.env)`, `sendCommand("start")`.
-- The type of that object follows the Types rules: exported next to the function when it describes the function's input (`SimulationOptions`, `StepInput`), written inline when the function is used in only one file.
+- The type of that object follows the Types rules below: it stays next to the function while no other file imports it (`SimulationOptions`, `StepInput`), and is written inline when the function itself is private to its file.
 
 ## Imports
 
@@ -22,9 +22,9 @@
 
 ## Types
 
-- A type used by only one file stays in that file.
-- A type that describes a function's input or output stays next to that function and is exported with it (e.g. `Command` with `sendCommand` in `api/`, `Simulation` with `createSimulation`).
-- Any other type used by several files of one app goes in that app's `types/` folder (e.g. `web/src/types/connection.ts`). Never import a type from a hook or component file.
+- A type used by only one file stays in that file, even when it describes a function's input or output (e.g. `SimulationOptions` next to `createSimulation`).
+- As soon as another file imports it, it moves to a `types.ts` in the same folder, re-exported by that folder's `index.ts` (e.g. `Simulation` in `simulation/types.ts`, `Command` in `api/types.ts`).
+- A type used by several folders that belongs to none of them goes in the app's `types/` folder (e.g. `web/src/types/connection.ts`). Never import a type from a hook or component file.
 - Types used by both `web/` and `server/` live once in `shared/types.ts`. Never copy a type between the two apps.
 - Constant values used by both apps live once in `shared/` too (e.g. `LIMITS` in `shared/limits.ts`, used by the server validation, the sliders and the drawing). Never copy a value between the two apps.
 - Import shared types with `import type { Status } from "@shared"`, and shared values with a normal import: `import { LIMITS } from "@shared"`.

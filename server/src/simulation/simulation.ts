@@ -61,5 +61,3 @@ export function createSimulation({
 
   return { start, pause, stop, tick, setConfig, getState };
 }
-
-export type Simulation = ReturnType<typeof createSimulation>;
