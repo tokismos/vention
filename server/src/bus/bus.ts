@@ -1,31 +1,28 @@
 import mqtt from "mqtt";
-
+import { announcePresence, clearPresence, presenceWill } from "./presence";
+import { createStatePublisher } from "./state";
 export type BusOptions = {
   brokerUrl: string;
   pendulumId: number;
 };
 
-export function presenceTopic(pendulumId: number): string {
-  return `pendulum/${pendulumId}/presence`;
-}
-
 export function connectBus({ brokerUrl, pendulumId }: BusOptions) {
-  const topic = presenceTopic(pendulumId);
   const client = mqtt.connect(brokerUrl, {
     clientId: `pendulum-${pendulumId}`,
-    will: { topic, payload: "", qos: 1, retain: true },
+    will: presenceWill(pendulumId),
+    queueQoSZero: false,
   });
+  const state = createStatePublisher({ client, pendulumId });
 
   client.on("connect", () => {
-    client.publish(topic, JSON.stringify({ id: pendulumId }), { qos: 1, retain: true });
+    announcePresence({ client, pendulumId });
+    state.republish();
   });
 
   async function close() {
-    if (client.connected) {
-      await client.publishAsync(topic, "", { qos: 1, retain: true });
-    }
+    if (client.connected) await Promise.all([state.clear(), clearPresence({ client, pendulumId })]);
     await client.endAsync();
   }
 
-  return { close };
+  return { publishState: state.publish, close };
 }
