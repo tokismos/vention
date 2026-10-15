@@ -131,9 +131,8 @@ On every pull request and every push to `main`, GitHub Actions installs the pack
 
 ## Known limitations
 
-- Only one pendulum so far. The five server instances, neighbor monitoring, collision detection and the STOP and RESTART messages are not built yet.
+- Neighbor monitoring, collision detection and the STOP and RESTART messages are not built yet.
 - The pendulum runs about 2% slower than real time. Node timers fire slightly late, and each step always moves by exactly 1/60 s.
-- Polling sends about 20 requests per second per open page.
+- Polling sends about 20 requests per second per pendulum, per open page (100 per second with 5 pendulums).
 - The state lives in memory. Restarting the server resets the pendulum.
-- No wind and no configurable anchor position yet.
-- The sliders still edit pendulum 1 only.
+- No wind yet. The anchor can be changed through `POST /config`, but there is no slider for it yet.
