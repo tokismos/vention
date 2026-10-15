@@ -1,15 +1,18 @@
 import { z } from "zod";
 
 const BASE_PORT = 3000;
+const DEFAULT_BROKER_URL = "mqtt://localhost:1883";
 
 const EnvSchema = z.object({
   PENDULUM_ID: z.coerce.number().int().min(1).default(1),
   PORT: z.coerce.number().int().min(1).max(65535).optional(),
+  BROKER_URL: z.url().default(DEFAULT_BROKER_URL),
 });
 
 export type Config = {
   pendulumId: number;
   port: number;
+  brokerUrl: string;
 };
 
 export function loadConfig(env: NodeJS.ProcessEnv): Config {
@@ -18,6 +21,10 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     throw new Error(`Invalid environment variables:\n${z.prettifyError(result.error)}`);
   }
 
-  const { PENDULUM_ID, PORT } = result.data;
-  return { pendulumId: PENDULUM_ID, port: PORT ?? BASE_PORT + PENDULUM_ID };
+  const { PENDULUM_ID, PORT, BROKER_URL } = result.data;
+  return {
+    pendulumId: PENDULUM_ID,
+    port: PORT ?? BASE_PORT + PENDULUM_ID,
+    brokerUrl: BROKER_URL,
+  };
 }

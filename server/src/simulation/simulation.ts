@@ -1,5 +1,5 @@
 import type { PendulumConfig, PendulumState, ServerState, Status } from "@shared";
-import { step } from "@/physics";
+import { ballPosition, ballRadius, step } from "@/physics";
 
 const DT = 1 / 60;
 const ANCHOR_SPACING = 1;
@@ -15,48 +15,64 @@ function initialState(config: PendulumConfig): PendulumState {
 export type SimulationOptions = {
   id: number;
   config?: PendulumConfig;
+  onChange?: (state: ServerState) => void;
 };
 
 export function createSimulation({
   id,
   config: initialConfig = defaultConfig(id),
+  onChange = () => {},
 }: SimulationOptions) {
   let config = initialConfig;
   let state: PendulumState = initialState(config);
   let status: Status = "stopped";
   let timer: NodeJS.Timeout | undefined;
 
+  function notify() {
+    onChange(getState());
+  }
+
   function tick() {
     state = step({ state, length: config.length, dt: DT });
+    notify();
   }
 
   function start() {
     if (status === "running") return;
     status = "running";
     timer = setInterval(tick, DT * 1000);
+    notify();
   }
 
   function pause() {
     if (status !== "running") return;
     clearInterval(timer);
     status = "paused";
+    notify();
   }
 
   function stop() {
     clearInterval(timer);
     status = "stopped";
     state = initialState(config);
+    notify();
   }
 
   function setConfig(change: Partial<PendulumConfig>): boolean {
     if (status !== "stopped") return false;
     config = { ...config, ...change };
     state = initialState(config);
+    notify();
     return true;
   }
 
   function getState(): ServerState {
-    return { id, status, config, ...state };
+    const position = ballPosition({
+      anchorX: config.anchorX,
+      length: config.length,
+      angle: state.angle,
+    });
+    return { id, status, config, ...state, ball: { ...position, radius: ballRadius(config.mass) } };
   }
 
   return { start, pause, stop, tick, setConfig, getState };

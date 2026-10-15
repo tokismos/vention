@@ -6,3 +6,5 @@ export const LIMITS: Record<keyof PendulumConfig, Limit> = {
   mass: { min: 0.5, max: 5 },
   anchorX: { min: 0, max: 10 },
 };
+
+export const MAX_BALL_RADIUS = 0.3;

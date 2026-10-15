@@ -33,6 +33,7 @@ function pendulumState({
     config: { angleDeg: 30, length: 2, mass: 1, anchorX },
     angle,
     velocity: 0,
+    ball: { x: anchorX + 2 * Math.sin(angle), y: 2 * Math.cos(angle), radius: 0.2 },
   };
 }
 
