@@ -15,7 +15,9 @@ Then open http://localhost:5173. `npm start` runs 5 pendulum servers and the web
 
 To run another number of pendulums (1 to 10), start with `PENDULUM_COUNT=3 npm start`. Pendulum `id` listens on port `3000 + id`, so pendulum 1 is on 3001.
 
-To run one server alone, use `PENDULUM_ID=3 npm run dev --workspace server`. The web app reads the server address from `VITE_API_URL` in `web/.env`. To change it on your machine only, create `web/.env.local` with your own value.
+To run one server alone, use `PENDULUM_ID=3 npm run dev --workspace server`.
+
+The browser only talks to the web app's own address. Vite forwards `/api/{id}/...` to pendulum `id`, so `/api/3/state` reaches `http://localhost:3003/state`.
 
 ## Scripts
 

@@ -20,12 +20,12 @@ function renderSimulation() {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return renderHook(() => useSimulation(), { wrapper });
+  return renderHook(() => useSimulation(1), { wrapper });
 }
 
 describe("useSimulation", () => {
   it("shows offline when the server is down", async () => {
-    server.use(http.get("*/state", () => HttpResponse.error()));
+    server.use(http.get("*/api/1/state", () => HttpResponse.error()));
 
     const { result } = renderSimulation();
 
