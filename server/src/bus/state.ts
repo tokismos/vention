@@ -1,6 +1,6 @@
+import { stateTopic } from "@shared";
 import type { ServerState } from "@shared";
 import { KEPT } from "./options";
-import { stateTopic } from "./topics";
 import type { BusClient } from "./types";
 
 export function createStatePublisher({ client, pendulumId }: BusClient) {

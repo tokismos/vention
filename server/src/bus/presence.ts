@@ -1,6 +1,6 @@
+import { presenceTopic } from "@shared";
 import type { IClientOptions } from "mqtt";
 import { KEPT } from "./options";
-import { presenceTopic } from "./topics";
 import type { BusClient } from "./types";
 
 export function presenceWill(pendulumId: number): IClientOptions["will"] {
