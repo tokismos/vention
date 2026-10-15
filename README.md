@@ -52,7 +52,7 @@ server/src
   api/          createApp() and the HTTP routes, with input validation
 web/src
   api/          axios client and one function per route
-  hooks/        useSimulation(): polling, commands, connection status, errors
+  hooks/        usePendulums(): every pendulum, start, pause, stop. useSimulation(): one pendulum's config
   components/   controls (buttons, sliders, badges) and the pendulum drawing
 shared/
   types.ts      types used by both apps (Status, PendulumConfig, ServerState)
@@ -136,4 +136,4 @@ On every pull request and every push to `main`, GitHub Actions installs the pack
 - Polling sends about 20 requests per second per open page.
 - The state lives in memory. Restarting the server resets the pendulum.
 - No wind and no configurable anchor position yet.
-- The web app shows every pendulum, but its controls and sliders still act on pendulum 1 only.
+- The sliders still edit pendulum 1 only.

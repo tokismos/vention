@@ -4,9 +4,9 @@ import { Controls, ConfigPanel, ConnectionBadge, PendulumScene, StatusBadge } fr
 const FIRST_PENDULUM_ID = 1;
 
 export default function App() {
-  const { config, connection, error, status, isLoading, start, pause, stop, updateConfig } =
+  const { config, connection, configError, isLocked, isLoading, updateConfig } =
     useSimulation(FIRST_PENDULUM_ID);
-  const { pendulums } = usePendulums();
+  const { pendulums, status, commandError, start, pause, stop } = usePendulums();
 
   return (
     <div className="flex min-h-screen">
@@ -15,10 +15,9 @@ export default function App() {
         <ConnectionBadge connection={connection} />
         <StatusBadge status={status} />
         <Controls status={status} onStart={start} onPause={pause} onStop={stop} />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {config && (
-          <ConfigPanel config={config} disabled={status !== "stopped"} onChange={updateConfig} />
-        )}
+        {commandError && <p className="text-sm text-red-600">{commandError}</p>}
+        {configError && <p className="text-sm text-red-600">{configError}</p>}
+        {config && <ConfigPanel config={config} disabled={isLocked} onChange={updateConfig} />}
       </aside>
       <main className="flex-1 p-6">
         {isLoading && <p>Loading…</p>}
