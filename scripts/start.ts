@@ -14,6 +14,8 @@ function pendulumCount(): number {
 const count = pendulumCount();
 const ids = Array.from({ length: count }, (_, index) => index + 1);
 
+const broker = { name: "broker", command: "npm run --silent broker --workspace server" };
+
 const pendulums = ids.map((id) => ({
   name: `pendulum-${id}`,
   command: "npm run --silent dev --workspace server",
@@ -26,6 +28,6 @@ const web = {
   env: { VITE_PENDULUM_COUNT: String(count) },
 };
 
-const { result } = concurrently([...pendulums, web], { prefix: "name" });
+const { result } = concurrently([broker, ...pendulums, web], { prefix: "name" });
 
 result.catch(() => process.exit(1));
