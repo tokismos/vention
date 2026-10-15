@@ -12,6 +12,11 @@ export type PendulumConfig = {
   anchorX: number;
 };
 
+export type Limit = {
+  min: number;
+  max: number;
+};
+
 export type ServerState = PendulumState & {
   id: number;
   status: Status;

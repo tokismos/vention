@@ -1,11 +1,12 @@
-import { useSimulation } from "@/hooks";
-import { Controls, ConfigPanel, ConnectionBadge, PendulumView, StatusBadge } from "@/components";
+import { usePendulums, useSimulation } from "@/hooks";
+import { Controls, ConfigPanel, ConnectionBadge, PendulumScene, StatusBadge } from "@/components";
 
 const FIRST_PENDULUM_ID = 1;
 
 export default function App() {
-  const { state, config, connection, error, status, isLoading, start, pause, stop, updateConfig } =
+  const { config, connection, error, status, isLoading, start, pause, stop, updateConfig } =
     useSimulation(FIRST_PENDULUM_ID);
+  const { pendulums } = usePendulums();
 
   return (
     <div className="flex min-h-screen">
@@ -21,9 +22,7 @@ export default function App() {
       </aside>
       <main className="flex-1 p-6">
         {isLoading && <p>Loading…</p>}
-        {state && (
-          <PendulumView angle={state.angle} length={state.config.length} mass={state.config.mass} />
-        )}
+        <PendulumScene pendulums={pendulums} />
       </main>
     </div>
   );

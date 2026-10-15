@@ -136,4 +136,4 @@ On every pull request and every push to `main`, GitHub Actions installs the pack
 - Polling sends about 20 requests per second per open page.
 - The state lives in memory. Restarting the server resets the pendulum.
 - No wind and no configurable anchor position yet.
-- The web app still shows only pendulum 1.
+- The web app shows every pendulum, but its controls and sliders still act on pendulum 1 only.

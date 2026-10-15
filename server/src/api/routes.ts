@@ -1,13 +1,19 @@
 import { Router } from "express";
 import { z } from "zod";
+import { LIMITS } from "@shared";
+import type { Limit } from "@shared";
 import type { Simulation } from "@/simulation";
+
+function within({ min, max }: Limit) {
+  return z.number().min(min).max(max);
+}
 
 const ConfigChangeSchema = z
   .strictObject({
-    angleDeg: z.number().min(-90).max(90),
-    length: z.number().min(0.5).max(3),
-    mass: z.number().min(0.5).max(5),
-    anchorX: z.number().min(0).max(10),
+    angleDeg: within(LIMITS.angleDeg),
+    length: within(LIMITS.length),
+    mass: within(LIMITS.mass),
+    anchorX: within(LIMITS.anchorX),
   })
   .partial();
 

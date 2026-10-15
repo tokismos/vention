@@ -1,3 +1,4 @@
+import { LIMITS } from "@shared";
 import type { PendulumConfig } from "@shared";
 import { Slider } from "./Slider";
 
@@ -13,8 +14,8 @@ export function ConfigPanel({ config, disabled, onChange }: Props) {
       <Slider
         label="Angle (°)"
         value={config.angleDeg}
-        min={-90}
-        max={90}
+        min={LIMITS.angleDeg.min}
+        max={LIMITS.angleDeg.max}
         step={1}
         disabled={disabled}
         onChange={(v) => onChange({ angleDeg: v })}
@@ -22,8 +23,8 @@ export function ConfigPanel({ config, disabled, onChange }: Props) {
       <Slider
         label="Length (m)"
         value={config.length}
-        min={0.5}
-        max={3}
+        min={LIMITS.length.min}
+        max={LIMITS.length.max}
         step={0.1}
         disabled={disabled}
         onChange={(v) => onChange({ length: v })}
@@ -31,8 +32,8 @@ export function ConfigPanel({ config, disabled, onChange }: Props) {
       <Slider
         label="Mass (kg)"
         value={config.mass}
-        min={0.5}
-        max={5}
+        min={LIMITS.mass.min}
+        max={LIMITS.mass.max}
         step={0.5}
         disabled={disabled}
         onChange={(v) => onChange({ mass: v })}

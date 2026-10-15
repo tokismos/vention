@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient, type QueryStatus } from "@tanstack/react-query";
 import type { PendulumConfig, ServerState } from "@shared";
-import { fetchState, sendCommand, sendConfig } from "@/api";
+import { sendCommand, sendConfig } from "@/api";
 import type { Connection } from "@/types";
-
-const POLL_MS = 50;
+import { stateQuery } from "./stateQuery";
 
 const CONNECTION: Record<QueryStatus, Connection> = {
   pending: "connecting",
@@ -13,15 +12,10 @@ const CONNECTION: Record<QueryStatus, Connection> = {
 
 export function useSimulation(id: number) {
   const queryClient = useQueryClient();
-  const stateKey = ["state", id];
-  const saveState = (state: ServerState) => queryClient.setQueryData(stateKey, state);
+  const query = stateQuery(id);
+  const saveState = (state: ServerState) => queryClient.setQueryData(query.queryKey, state);
 
-  const { data: state, status: queryStatus } = useQuery({
-    queryKey: stateKey,
-    queryFn: () => fetchState(id),
-    refetchInterval: POLL_MS,
-    retry: false,
-  });
+  const { data: state, status: queryStatus } = useQuery(query);
 
   const { mutate: run, error: commandError } = useMutation({
     mutationFn: sendCommand,
