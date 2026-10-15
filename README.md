@@ -50,6 +50,9 @@ server/src
   physics/      step(): moves the pendulum by one time step (pure function)
   simulation/   createSimulation(): start, pause, stop, config, and the timer
   api/          createApp() and the HTTP routes, with input validation
+  config/       loadConfig(): reads and checks PENDULUM_ID, PORT, BROKER_URL
+  broker/       startBroker(): the MQTT broker (Aedes), TCP 1883 and WebSocket 8888
+  bus/          connectBus(): connects a pendulum to the broker, presence and Last Will
 web/src
   api/          axios client and one function per route
   hooks/        usePendulums(): every pendulum, start, pause, stop. useSimulation(): one pendulum's config
