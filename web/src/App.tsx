@@ -15,7 +15,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(FIRST_PENDULUM_ID);
   const { config, connection, configError, isLocked, isLoading, updateConfig } =
     useSimulation(selectedId);
-  const { pendulums, status, commandError, start, pause, stop } = usePendulums();
+  const { ids, pendulums, offlineIds, status, commandError, start, pause, stop } = usePendulums();
 
   return (
     <div className="flex min-h-screen">
@@ -26,10 +26,14 @@ export default function App() {
         <Controls status={status} onStart={start} onPause={pause} onStop={stop} />
         {commandError && <p className="text-sm text-red-600">{commandError}</p>}
         <PendulumPicker
-          ids={pendulums.map(({ id }) => id)}
+          ids={ids}
+          offlineIds={offlineIds}
           selectedId={selectedId}
           onSelect={setSelectedId}
         />
+        {offlineIds.length > 0 && (
+          <p className="text-sm text-red-600">Offline: {offlineIds.join(", ")}</p>
+        )}
         {configError && <p className="text-sm text-red-600">{configError}</p>}
         {config && <ConfigPanel config={config} disabled={isLocked} onChange={updateConfig} />}
       </aside>

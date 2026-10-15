@@ -15,7 +15,8 @@ export function useSimulation(id: number) {
   const query = stateQuery(id);
   const saveState = (state: ServerState) => queryClient.setQueryData(query.queryKey, state);
 
-  const { data: state, status: queryStatus } = useQuery(query);
+  const { data: state, status: queryStatus, errorUpdateCount } = useQuery(query);
+  const isOffline = queryStatus !== "success" && errorUpdateCount > 0;
 
   const { mutate: saveConfig, error: configError } = useMutation({
     mutationFn: sendConfig,
@@ -24,10 +25,10 @@ export function useSimulation(id: number) {
 
   return {
     config: state?.config,
-    connection: CONNECTION[queryStatus],
+    connection: isOffline ? "offline" : CONNECTION[queryStatus],
     configError: configError?.message ?? null,
     isLocked: (state?.status ?? "stopped") !== "stopped",
-    isLoading: queryStatus === "pending",
+    isLoading: queryStatus === "pending" && !isOffline,
     updateConfig: (change: Partial<PendulumConfig>) => saveConfig({ id, change }),
   };
 }
