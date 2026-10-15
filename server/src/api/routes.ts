@@ -7,6 +7,7 @@ const ConfigChangeSchema = z
     angleDeg: z.number().min(-90).max(90),
     length: z.number().min(0.5).max(3),
     mass: z.number().min(0.5).max(5),
+    anchorX: z.number().min(0).max(10),
   })
   .partial();
 

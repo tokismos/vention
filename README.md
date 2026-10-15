@@ -8,13 +8,14 @@ You need Node 22 (see `.nvmrc`).
 
 ```bash
 npm install
-npm run dev --workspace server
-npm run dev --workspace web
+npm start
 ```
 
-Run the last two commands in two terminals, then open http://localhost:5173.
+Then open http://localhost:5173. `npm start` runs 5 pendulum servers and the web app. Ctrl+C stops them all.
 
-The server listens on port 3001. To use another port, start it with `PORT=4000`. The web app reads the server address from `VITE_API_URL` in `web/.env`. To change it on your machine only, create `web/.env.local` with your own value.
+To run another number of pendulums (1 to 10), start with `PENDULUM_COUNT=3 npm start`. Pendulum `id` listens on port `3000 + id`, so pendulum 1 is on 3001.
+
+To run one server alone, use `PENDULUM_ID=3 npm run dev --workspace server`. The web app reads the server address from `VITE_API_URL` in `web/.env`. To change it on your machine only, create `web/.env.local` with your own value.
 
 ## Scripts
 
@@ -22,11 +23,12 @@ Run them from the root.
 
 | Command             | What it does                                        |
 | ------------------- | --------------------------------------------------- |
+| `npm start`         | Runs all pendulum servers and the web app           |
 | `npm test`          | Runs all server and web tests                       |
 | `npm run test:ui`   | Opens the test results in the browser               |
 | `npm run lint`      | Checks the code with ESLint                         |
 | `npm run format`    | Formats the code with Prettier                      |
-| `npm run typecheck` | Checks the server types                             |
+| `npm run typecheck` | Checks the server and launcher types                |
 | `npm run build`     | Builds the web app (this also checks the web types) |
 
 ## Architecture
@@ -132,4 +134,4 @@ On every pull request and every push to `main`, GitHub Actions installs the pack
 - Polling sends about 20 requests per second per open page.
 - The state lives in memory. Restarting the server resets the pendulum.
 - No wind and no configurable anchor position yet.
-- Starting the app takes two commands, one per app.
+- The web app still shows only pendulum 1.

@@ -17,13 +17,19 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
-function pendulumState(status: Status, angle = 0): ServerState {
-  return { status, config: { angleDeg: 30, length: 2, mass: 1 }, angle, velocity: 0 };
+function pendulumState({ status, angle = 0 }: { status: Status; angle?: number }): ServerState {
+  return {
+    id: 1,
+    status,
+    config: { angleDeg: 30, length: 2, mass: 1, anchorX: 1 },
+    angle,
+    velocity: 0,
+  };
 }
 
 function serverReturns(status: Status) {
   server.use(
-    http.get("*/state", () => HttpResponse.json(pendulumState(status), { headers: CORS })),
+    http.get("*/state", () => HttpResponse.json(pendulumState({ status }), { headers: CORS })),
   );
 }
 
@@ -32,7 +38,7 @@ function serverSwings() {
   server.use(
     http.get("*/state", () => {
       angle -= 0.1;
-      return HttpResponse.json(pendulumState("running", angle), { headers: CORS });
+      return HttpResponse.json(pendulumState({ status: "running", angle }), { headers: CORS });
     }),
   );
 }

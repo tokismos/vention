@@ -3,6 +3,8 @@
 ## Code style
 
 - Never add comments in code. Names and small functions should explain the code.
+- A function with two or more parameters takes one object instead, so every call names its values: `createSimulation({ id: 3 })`, `step({ state, length, dt })`. A function with one obvious parameter keeps it plain: `loadConfig(process.env)`, `sendCommand("start")`.
+- The type of that object follows the Types rules: exported next to the function when it describes the function's input (`SimulationOptions`, `StepInput`), written inline when the function is used in only one file.
 
 ## Imports
 
