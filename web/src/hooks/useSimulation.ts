@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryStatus } from "@tanstack/react-query";
 import type { PendulumConfig, ServerState } from "@shared";
-import { sendCommand, sendConfig } from "@/api";
+import { sendConfig } from "@/api";
 import type { Connection } from "@/types";
 import { stateQuery } from "./stateQuery";
 
@@ -15,12 +15,8 @@ export function useSimulation(id: number) {
   const query = stateQuery(id);
   const saveState = (state: ServerState) => queryClient.setQueryData(query.queryKey, state);
 
-  const { data: state, status: queryStatus } = useQuery(query);
-
-  const { mutate: run, error: commandError } = useMutation({
-    mutationFn: sendCommand,
-    onSuccess: saveState,
-  });
+  const { data: state, status: queryStatus, errorUpdateCount } = useQuery(query);
+  const isOffline = queryStatus !== "success" && errorUpdateCount > 0;
 
   const { mutate: saveConfig, error: configError } = useMutation({
     mutationFn: sendConfig,
@@ -28,15 +24,11 @@ export function useSimulation(id: number) {
   });
 
   return {
-    state,
     config: state?.config,
-    connection: CONNECTION[queryStatus],
-    error: (commandError ?? configError)?.message ?? null,
-    status: state?.status ?? "stopped",
-    isLoading: queryStatus === "pending",
-    start: () => run({ id, command: "start" }),
-    pause: () => run({ id, command: "pause" }),
-    stop: () => run({ id, command: "stop" }),
+    connection: isOffline ? "offline" : CONNECTION[queryStatus],
+    configError: configError?.message ?? null,
+    isLocked: (state?.status ?? "stopped") !== "stopped",
+    isLoading: queryStatus === "pending" && !isOffline,
     updateConfig: (change: Partial<PendulumConfig>) => saveConfig({ id, change }),
   };
 }

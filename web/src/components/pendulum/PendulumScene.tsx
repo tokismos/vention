@@ -17,9 +17,10 @@ function ballRadius(mass: number): number {
 
 type Props = {
   pendulums: ServerState[];
+  selectedId: number;
 };
 
-export function PendulumScene({ pendulums }: Props) {
+export function PendulumScene({ pendulums, selectedId }: Props) {
   return (
     <svg viewBox={VIEW_BOX} className="w-full">
       <rect x={BAR_START} y={TOP_SPACE} width={BAR_LENGTH} height={BAR_HEIGHT} fill="gray" />
@@ -37,7 +38,12 @@ export function PendulumScene({ pendulums }: Props) {
               stroke="black"
               vectorEffect="non-scaling-stroke"
             />
-            <circle cx={x} cy={y} r={ballRadius(config.mass)} fill="orange" />
+            <circle
+              cx={x}
+              cy={y}
+              r={ballRadius(config.mass)}
+              fill={id === selectedId ? "orangered" : "orange"}
+            />
           </g>
         );
       })}

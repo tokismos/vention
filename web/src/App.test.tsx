@@ -1,6 +1,6 @@
 import type { ServerState, Status } from "@shared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -101,5 +101,28 @@ describe("App", () => {
       [...container.querySelectorAll("circle")].map((ball) => ball.getAttribute("cx"));
 
     await waitFor(() => expect(ballsX()).toEqual(["1", "2", "3"]));
+  });
+
+  it("edits the pendulum you pick", async () => {
+    vi.stubEnv("VITE_PENDULUM_COUNT", "3");
+    const configured: number[] = [];
+    server.use(
+      http.get("*/api/:id/state", ({ params }) =>
+        HttpResponse.json(pendulumState({ id: Number(params.id), status: "stopped" })),
+      ),
+      http.post("*/api/:id/config", ({ params }) => {
+        const id = Number(params.id);
+        configured.push(id);
+        return HttpResponse.json(pendulumState({ id, status: "stopped" }));
+      }),
+    );
+    renderApp();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Pendulum 2" }));
+    fireEvent.change(await screen.findByRole("slider", { name: /Length/ }), {
+      target: { value: "1.5" },
+    });
+
+    await waitFor(() => expect(configured).toEqual([2]));
   });
 });
