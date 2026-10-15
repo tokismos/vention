@@ -1,5 +1,5 @@
 import type { PendulumConfig, PendulumState, ServerState, Status } from "@shared";
-import { step } from "@/physics";
+import { ballPosition, ballRadius, step } from "@/physics";
 
 const DT = 1 / 60;
 const ANCHOR_SPACING = 1;
@@ -56,7 +56,12 @@ export function createSimulation({
   }
 
   function getState(): ServerState {
-    return { id, status, config, ...state };
+    const position = ballPosition({
+      anchorX: config.anchorX,
+      length: config.length,
+      angle: state.angle,
+    });
+    return { id, status, config, ...state, ball: { ...position, radius: ballRadius(config.mass) } };
   }
 
   return { start, pause, stop, tick, setConfig, getState };

@@ -17,8 +17,15 @@ export type Limit = {
   max: number;
 };
 
+export type Ball = {
+  x: number;
+  y: number;
+  radius: number;
+};
+
 export type ServerState = PendulumState & {
   id: number;
   status: Status;
   config: PendulumConfig;
+  ball: Ball;
 };
