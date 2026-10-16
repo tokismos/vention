@@ -6,7 +6,8 @@ import type { ProxyOptions } from "vite";
 import { defineConfig } from "vitest/config";
 
 const BASE_PORT = 3000;
-const pendulumCount = Number(process.env.VITE_PENDULUM_COUNT ?? 1);
+const BROKER_WEBSOCKET_URL = "ws://localhost:8888";
+const pendulumCount = Number(process.env.PENDULUM_COUNT ?? 1);
 const ids = Array.from({ length: pendulumCount }, (_, index) => index + 1);
 
 function pendulumProxy(id: number): [string, ProxyOptions] {
@@ -29,7 +30,10 @@ export default defineConfig({
     },
   },
   server: {
-    proxy: Object.fromEntries(ids.map(pendulumProxy)),
+    proxy: {
+      ...Object.fromEntries(ids.map(pendulumProxy)),
+      "/mqtt": { target: BROKER_WEBSOCKET_URL, ws: true },
+    },
   },
   test: {
     environment: "jsdom",

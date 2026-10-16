@@ -25,7 +25,7 @@ const pendulums = ids.map((id) => ({
 const web = {
   name: "web",
   command: "npm run --silent dev --workspace web",
-  env: { VITE_PENDULUM_COUNT: String(count) },
+  env: { PENDULUM_COUNT: String(count) },
 };
 
 const { result } = concurrently([broker, ...pendulums, web], { prefix: "name" });
