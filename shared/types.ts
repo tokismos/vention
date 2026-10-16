@@ -1,4 +1,4 @@
-export type Status = "running" | "paused" | "stopped";
+export type Status = "running" | "paused" | "stopped" | "halted";
 
 export type PendulumState = {
   angle: number;

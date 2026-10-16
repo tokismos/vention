@@ -37,18 +37,36 @@ export function createSimulation({
     notify();
   }
 
-  function start() {
-    if (status === "running") return;
+  function run() {
     status = "running";
     timer = setInterval(tick, DT * 1000);
     notify();
   }
 
-  function pause() {
+  function freeze(frozenStatus: Status) {
     if (status !== "running") return;
     clearInterval(timer);
-    status = "paused";
+    status = frozenStatus;
     notify();
+  }
+
+  function start() {
+    if (status === "running" || status === "halted") return;
+    run();
+  }
+
+  function pause() {
+    freeze("paused");
+  }
+
+  function halt() {
+    freeze("halted");
+  }
+
+  function restart() {
+    if (status !== "halted") return;
+    state = initialState(config);
+    run();
   }
 
   function stop() {
@@ -75,5 +93,5 @@ export function createSimulation({
     return { id, status, config, ...state, ball: { ...position, radius: ballRadius(config.mass) } };
   }
 
-  return { start, pause, stop, tick, setConfig, getState };
+  return { start, pause, halt, restart, stop, tick, setConfig, getState };
 }
