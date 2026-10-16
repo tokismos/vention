@@ -19,6 +19,9 @@ export function collides({ a, b }: CollisionInput): boolean {
 export function findCollision({ self, live }: FindCollisionInput): ServerState | undefined {
   return [...live.states.values()].find(
     (other) =>
-      other.id !== self.id && live.alive.has(other.id) && collides({ a: self.ball, b: other.ball }),
+      other.id !== self.id &&
+      live.alive.has(other.id) &&
+      other.status !== "halted" &&
+      collides({ a: self.ball, b: other.ball }),
   );
 }
