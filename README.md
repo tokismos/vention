@@ -1,6 +1,6 @@
 # Pendulum Simulation
 
-A pendulum simulated on a Node.js server, drawn and controlled from a React web app. You can start, pause and stop it, and change its starting angle, string length and mass. When two balls touch, every pendulum stops, and they all restart together 5 seconds later.
+A pendulum simulated on a Node.js server, drawn and controlled from a React web app. You can start, pause and stop it, and change its starting angle, string length, mass and anchor position. When two balls touch, every pendulum stops, and they all restart together 5 seconds later.
 
 ## Quick start
 
@@ -84,15 +84,15 @@ shared/
 
 Every successful call returns the full state: `{ id, status, config, angle, velocity, ball, collision }`. `collision` is the two ids that collided while `halted`, otherwise `null`. Errors return `{ error: "message" }`.
 
-| Route          | What it does                         | Errors                                        |
-| -------------- | ------------------------------------ | --------------------------------------------- |
-| `GET /state`   | Returns the current state            |                                               |
-| `POST /start`  | Starts or resumes, ignored if halted |                                               |
-| `POST /pause`  | Freezes it where it is               |                                               |
-| `POST /stop`   | Stops it and resets it to its start  |                                               |
-| `POST /config` | Changes `angleDeg`, `length`, `mass` | 400 if a value is invalid, 409 if not stopped |
+| Route          | What it does                                    | Errors                                        |
+| -------------- | ----------------------------------------------- | --------------------------------------------- |
+| `GET /state`   | Returns the current state                       |                                               |
+| `POST /start`  | Starts or resumes, ignored if halted            |                                               |
+| `POST /pause`  | Freezes it where it is                          |                                               |
+| `POST /stop`   | Stops it and resets it to its start             |                                               |
+| `POST /config` | Changes `angleDeg`, `length`, `mass`, `anchorX` | 400 if a value is invalid, 409 if not stopped |
 
-Allowed values: angle from -90 to 90 degrees, length from 0.5 to 3 m, mass from 0.5 to 5 kg.
+Allowed values: angle from -90 to 90 degrees, length from 0.5 to 3 m, mass from 0.5 to 5 kg, anchor X from 0 to 10 m.
 
 ## Technologies and why
 
@@ -151,6 +151,7 @@ Server (`server/src`):
 Web (`web/src`):
 
 - `components/controls/Controls.test.tsx`: the right buttons are enabled for each status, and only Stop while halted.
+- `components/controls/ConfigPanel.test.tsx`: moving the anchor slider sends the new anchor position.
 - `components/controls/CollisionBanner.test.tsx`: the banner names the two pendulums and counts down to the restart.
 - `bus/overallStatus.test.ts`: one halted pendulum makes the whole group halted.
 - `bus/snapshot.test.ts`: the snapshot carries the collision a halted pendulum reports.
@@ -171,4 +172,4 @@ On every pull request and every push to `main`, GitHub Actions installs the pack
 - The browser connects to the broker without a login. Fine locally, a real deployment needs authentication.
 - The page's live view (the MQTT feed and the page that draws it) has no tests yet.
 - The state lives in memory. Restarting the server resets the pendulum.
-- No wind yet. The anchor can be changed through `POST /config`, but there is no slider for it yet.
+- No wind yet.

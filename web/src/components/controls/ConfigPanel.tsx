@@ -38,6 +38,15 @@ export function ConfigPanel({ config, disabled, onChange }: Props) {
         disabled={disabled}
         onChange={(v) => onChange({ mass: v })}
       />
+      <Slider
+        label="Anchor X (m)"
+        value={config.anchorX}
+        min={LIMITS.anchorX.min}
+        max={LIMITS.anchorX.max}
+        step={0.1}
+        disabled={disabled}
+        onChange={(v) => onChange({ anchorX: v })}
+      />
     </section>
   );
 }
