@@ -1,4 +1,4 @@
-export const RESTART_DELAY_MS = 5000;
+import { RESTART_DELAY_MS } from "@shared";
 
 export type RestartBarrierOptions = {
   alive: Set<number>;

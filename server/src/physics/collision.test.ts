@@ -20,12 +20,12 @@ describe("collides", () => {
 
   it("is true when the balls are exactly the gap apart", () => {
     const touching = 2 * RADIUS + COLLISION_GAP;
-    expect(collides({ a: ballAt(1), b: ballAt(1 + touching) })).toBe(true);
+    expect(collides({ a: ballAt(0), b: ballAt(touching) })).toBe(true);
   });
 
   it("is false just beyond the gap", () => {
     const apart = 2 * RADIUS + COLLISION_GAP + 0.001;
-    expect(collides({ a: ballAt(1), b: ballAt(1 + apart) })).toBe(false);
+    expect(collides({ a: ballAt(0), b: ballAt(apart) })).toBe(false);
   });
 });
 
@@ -37,6 +37,7 @@ function pendulumAt({ id, x }: { id: number; x: number }): ServerState {
     angle: 0,
     velocity: 0,
     ball: { x, y: 2, radius: 0.1 },
+    collision: null,
   };
 }
 

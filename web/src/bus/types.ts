@@ -1,4 +1,4 @@
-import type { ServerState } from "@shared";
+import type { Collision, ServerState, Status } from "@shared";
 import type { Connection } from "@/types";
 
 export type FeedSnapshot = {
@@ -6,6 +6,8 @@ export type FeedSnapshot = {
   ids: number[];
   pendulums: ServerState[];
   offlineIds: number[];
+  status: Status;
+  collision: Collision | null;
 };
 
 export type Feed = {

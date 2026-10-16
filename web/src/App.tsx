@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { usePendulums } from "@/hooks";
 import {
+  CollisionBanner,
   Controls,
   ConfigPanel,
   ConnectionBadge,
@@ -19,6 +20,7 @@ export default function App() {
     pendulums,
     offlineIds,
     status,
+    collision,
     commandError,
     configError,
     start,
@@ -34,6 +36,7 @@ export default function App() {
         <h1 className="text-xl font-bold">Pendulum simulation</h1>
         <ConnectionBadge connection={connection} />
         <StatusBadge status={status} />
+        {collision && <CollisionBanner collision={collision} />}
         <Controls status={status} onStart={start} onPause={pause} onStop={stop} />
         {commandError && <p className="text-sm text-red-600">{commandError}</p>}
         <PendulumPicker

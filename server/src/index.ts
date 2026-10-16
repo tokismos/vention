@@ -1,4 +1,4 @@
-import type { ServerState } from "@shared";
+import type { Collision, ServerState } from "@shared";
 import { createApp } from "@/api";
 import { createRestartBarrier } from "@/barrier";
 import { connectBus } from "@/bus";
@@ -14,8 +14,8 @@ const simulation = createSimulation({ id: pendulumId, onChange: handleChange });
 const barrier = createRestartBarrier({ alive: neighbors.alive, restart: simulation.restart });
 
 onOffline(simulation.pause);
-onStop(() => {
-  simulation.halt();
+onStop((collision) => {
+  simulation.halt(collision);
   restartAll();
 });
 onRestart(barrier.restartHeard);
@@ -23,10 +23,12 @@ publishState(simulation.getState());
 
 function handleChange(state: ServerState) {
   publishState(state);
-  if (state.status === "running" && findCollision({ self: state, live: neighbors })) {
-    simulation.halt();
-    stopAll();
-  }
+  if (state.status !== "running") return;
+  const other = findCollision({ self: state, live: neighbors });
+  if (!other) return;
+  const collision: Collision = [state.id, other.id];
+  simulation.halt(collision);
+  stopAll(collision);
 }
 
 createApp(simulation).listen(port, () => {

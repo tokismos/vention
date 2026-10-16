@@ -1,4 +1,5 @@
 import { RESTART_TOPIC, STOP_TOPIC } from "@shared";
+import type { Collision } from "@shared";
 import mqtt from "mqtt";
 import { watchNeighbors } from "./neighbors";
 import { announcePresence, clearPresence, presenceWill } from "./presence";
@@ -23,17 +24,17 @@ export function connectBus({ brokerUrl, pendulumId }: BusOptions) {
     client.subscribe([STOP_TOPIC, RESTART_TOPIC], { qos: 1 });
   });
 
-  function announce(topic: string) {
-    client.publish(topic, JSON.stringify({ from: pendulumId }), { qos: 1 });
+  function announce({ topic, message }: { topic: string; message: object }) {
+    client.publish(topic, JSON.stringify(message), { qos: 1 });
   }
 
   function onOffline(handler: () => void) {
     client.on("offline", handler);
   }
 
-  function onStop(handler: () => void) {
-    client.on("message", (topic) => {
-      if (topic === STOP_TOPIC) handler();
+  function onStop(handler: (collision: Collision) => void) {
+    client.on("message", (topic, payload) => {
+      if (topic === STOP_TOPIC) handler(JSON.parse(payload.toString()));
     });
   }
 
@@ -51,8 +52,8 @@ export function connectBus({ brokerUrl, pendulumId }: BusOptions) {
   return {
     publishState: state.publish,
     neighbors,
-    stopAll: () => announce(STOP_TOPIC),
-    restartAll: () => announce(RESTART_TOPIC),
+    stopAll: (collision: Collision) => announce({ topic: STOP_TOPIC, message: collision }),
+    restartAll: () => announce({ topic: RESTART_TOPIC, message: { from: pendulumId } }),
     onOffline,
     onStop,
     onRestart,
