@@ -1,4 +1,4 @@
-export type Status = "running" | "paused" | "stopped";
+export type Status = "running" | "paused" | "stopped" | "halted";
 
 export type PendulumState = {
   angle: number;
@@ -28,4 +28,14 @@ export type ServerState = PendulumState & {
   status: Status;
   config: PendulumConfig;
   ball: Ball;
+};
+
+export type LiveState = {
+  alive: Set<number>;
+  states: Map<number, ServerState>;
+};
+
+export type PendulumMessage = {
+  topic: string;
+  text: string;
 };

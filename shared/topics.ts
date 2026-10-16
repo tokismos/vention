@@ -1,5 +1,7 @@
 export const EVERY_PRESENCE = "pendulum/+/presence";
 export const EVERY_STATE = "pendulum/+/state";
+export const STOP_TOPIC = "system/stop";
+export const RESTART_TOPIC = "system/restart";
 
 export type PendulumTopic = {
   id: number;

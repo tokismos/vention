@@ -1,14 +1,33 @@
+import type { ServerState } from "@shared";
 import { createApp } from "@/api";
+import { createRestartBarrier } from "@/barrier";
 import { connectBus } from "@/bus";
 import { loadConfig } from "@/config";
+import { findCollision } from "@/physics";
 import { createSimulation } from "@/simulation";
 
 const { pendulumId, port, brokerUrl } = loadConfig(process.env);
 
-const { publishState, onOffline, close } = connectBus({ brokerUrl, pendulumId });
-const simulation = createSimulation({ id: pendulumId, onChange: publishState });
+const { publishState, neighbors, stopAll, restartAll, onOffline, onStop, onRestart, close } =
+  connectBus({ brokerUrl, pendulumId });
+const simulation = createSimulation({ id: pendulumId, onChange: handleChange });
+const barrier = createRestartBarrier({ alive: neighbors.alive, restart: simulation.restart });
+
 onOffline(simulation.pause);
+onStop(() => {
+  simulation.halt();
+  restartAll();
+});
+onRestart(barrier.restartHeard);
 publishState(simulation.getState());
+
+function handleChange(state: ServerState) {
+  publishState(state);
+  if (state.status === "running" && findCollision({ self: state, live: neighbors })) {
+    simulation.halt();
+    stopAll();
+  }
+}
 
 createApp(simulation).listen(port, () => {
   console.log(`Pendulum ${pendulumId} on http://localhost:${port}`);

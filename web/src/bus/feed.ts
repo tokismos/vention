@@ -1,69 +1,15 @@
-import { EVERY_PRESENCE, EVERY_STATE, parsePendulumTopic } from "@shared";
-import type { ServerState } from "@shared";
+import { applyMessage, createLiveState, EVERY_PRESENCE, EVERY_STATE } from "@shared";
 import mqtt from "mqtt";
 import type { Connection } from "@/types";
-
-const BROKER_PATH = "/mqtt";
-
-type FeedSnapshot = {
-  connection: Connection;
-  ids: number[];
-  pendulums: ServerState[];
-  offlineIds: number[];
-};
-
-type Feed = {
-  subscribe: (listener: () => void) => () => void;
-  getSnapshot: () => FeedSnapshot;
-};
-
-type Memory = {
-  alive: Set<number>;
-  states: Map<number, ServerState>;
-};
-
-type Message = {
-  topic: string;
-  text: string;
-};
-
-function brokerUrl(): string {
-  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${location.host}${BROKER_PATH}`;
-}
-
-function applyMessage({ alive, states, topic, text }: Memory & Message) {
-  const parsed = parsePendulumTopic(topic);
-  if (!parsed) return;
-
-  if (parsed.kind === "presence") {
-    if (text) alive.add(parsed.id);
-    else alive.delete(parsed.id);
-  } else {
-    if (text) states.set(parsed.id, JSON.parse(text));
-    else states.delete(parsed.id);
-  }
-}
-
-function toSnapshot({
-  connection,
-  alive,
-  states,
-}: Memory & { connection: Connection }): FeedSnapshot {
-  const ids = [...states.keys()].sort((a, b) => a - b);
-  return {
-    connection,
-    ids,
-    pendulums: ids.filter((id) => alive.has(id)).map((id) => states.get(id)!),
-    offlineIds: ids.filter((id) => !alive.has(id)),
-  };
-}
+import { brokerUrl } from "./brokerUrl";
+import { toSnapshot } from "./snapshot";
+import type { Feed } from "./types";
 
 function createFeed(): Feed {
-  const memory: Memory = { alive: new Set(), states: new Map() };
+  const live = createLiveState();
   const listeners = new Set<() => void>();
   let connection: Connection = "connecting";
-  let snapshot = toSnapshot({ connection, ...memory });
+  let snapshot = toSnapshot({ connection, ...live });
   let waiting = false;
 
   function changed() {
@@ -71,7 +17,7 @@ function createFeed(): Feed {
     waiting = true;
     requestAnimationFrame(() => {
       waiting = false;
-      snapshot = toSnapshot({ connection, ...memory });
+      snapshot = toSnapshot({ connection, ...live });
       listeners.forEach((listener) => listener());
     });
   }
@@ -79,8 +25,8 @@ function createFeed(): Feed {
   const client = mqtt.connect(brokerUrl());
 
   client.on("connect", () => {
-    memory.alive.clear();
-    memory.states.clear();
+    live.alive.clear();
+    live.states.clear();
     client.subscribe([EVERY_PRESENCE, EVERY_STATE]);
     connection = "online";
     changed();
@@ -92,7 +38,7 @@ function createFeed(): Feed {
   });
 
   client.on("message", (topic, payload) => {
-    applyMessage({ ...memory, topic, text: payload.toString() });
+    applyMessage({ ...live, topic, text: payload.toString() });
     changed();
   });
 
