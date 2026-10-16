@@ -37,6 +37,7 @@ function pendulumAt({ id, x }: { id: number; x: number }): ServerState {
     angle: 0,
     velocity: 0,
     ball: { x, y: 2, radius: 0.1 },
+    collision: null,
   };
 }
 

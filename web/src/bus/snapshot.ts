@@ -16,5 +16,6 @@ export function toSnapshot({
     pendulums,
     offlineIds: ids.filter((id) => !alive.has(id)),
     status: overallStatus(pendulums),
+    collision: pendulums.find((pendulum) => pendulum.collision)?.collision ?? null,
   };
 }

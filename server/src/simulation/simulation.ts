@@ -1,4 +1,4 @@
-import type { PendulumConfig, PendulumState, ServerState, Status } from "@shared";
+import type { Collision, PendulumConfig, PendulumState, ServerState, Status } from "@shared";
 import { ballPosition, ballRadius, step } from "@/physics";
 
 const DT = 1 / 60;
@@ -26,6 +26,7 @@ export function createSimulation({
   let config = initialConfig;
   let state: PendulumState = initialState(config);
   let status: Status = "stopped";
+  let collision: Collision | null = null;
   let timer: NodeJS.Timeout | undefined;
 
   function notify() {
@@ -39,6 +40,7 @@ export function createSimulation({
 
   function run() {
     status = "running";
+    collision = null;
     timer = setInterval(tick, DT * 1000);
     notify();
   }
@@ -59,7 +61,9 @@ export function createSimulation({
     freeze("paused");
   }
 
-  function halt() {
+  function halt(newCollision: Collision) {
+    if (status !== "running") return;
+    collision = newCollision;
     freeze("halted");
   }
 
@@ -72,6 +76,7 @@ export function createSimulation({
   function stop() {
     clearInterval(timer);
     status = "stopped";
+    collision = null;
     state = initialState(config);
     notify();
   }
@@ -90,7 +95,14 @@ export function createSimulation({
       length: config.length,
       angle: state.angle,
     });
-    return { id, status, config, ...state, ball: { ...position, radius: ballRadius(config.mass) } };
+    return {
+      id,
+      status,
+      config,
+      ...state,
+      ball: { ...position, radius: ballRadius(config.mass) },
+      collision,
+    };
   }
 
   return { start, pause, halt, restart, stop, tick, setConfig, getState };

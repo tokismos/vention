@@ -23,11 +23,14 @@ export type Ball = {
   radius: number;
 };
 
+export type Collision = [number, number];
+
 export type ServerState = PendulumState & {
   id: number;
   status: Status;
   config: PendulumConfig;
   ball: Ball;
+  collision: Collision | null;
 };
 
 export type LiveState = {

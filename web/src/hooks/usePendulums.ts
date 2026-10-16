@@ -5,7 +5,7 @@ import { pendulumFeed } from "@/bus";
 
 export function usePendulums() {
   const { subscribe, getSnapshot } = pendulumFeed();
-  const { connection, ids, pendulums, offlineIds, status } = useSyncExternalStore(
+  const { connection, ids, pendulums, offlineIds, status, collision } = useSyncExternalStore(
     subscribe,
     getSnapshot,
   );
@@ -22,6 +22,7 @@ export function usePendulums() {
     pendulums,
     offlineIds,
     status,
+    collision,
     commandError: commandError?.message ?? null,
     configError: configError?.message ?? null,
     start: () => runAll("start"),

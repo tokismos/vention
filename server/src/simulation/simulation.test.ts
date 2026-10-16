@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Collision } from "@shared";
 import { createSimulation } from "@/simulation";
+
+const COLLISION: Collision = [1, 2];
 
 describe("createSimulation", () => {
   beforeEach(() => vi.useFakeTimers());
@@ -57,7 +60,7 @@ describe("createSimulation", () => {
 
     simulation.start();
     vi.advanceTimersByTime(1000);
-    simulation.halt();
+    simulation.halt(COLLISION);
     const angleAtHalt = simulation.getState().angle;
     vi.advanceTimersByTime(5000);
 
@@ -68,7 +71,7 @@ describe("createSimulation", () => {
     const simulation = createSimulation({ id: 1 });
 
     simulation.start();
-    simulation.halt();
+    simulation.halt(COLLISION);
     simulation.start();
 
     expect(simulation.getState().status).toBe("halted");
@@ -80,7 +83,7 @@ describe("createSimulation", () => {
 
     simulation.start();
     vi.advanceTimersByTime(1000);
-    simulation.halt();
+    simulation.halt(COLLISION);
     simulation.restart();
 
     expect(simulation.getState()).toMatchObject({
@@ -94,11 +97,50 @@ describe("createSimulation", () => {
     const simulation = createSimulation({ id: 1 });
 
     simulation.start();
-    simulation.halt();
+    simulation.halt(COLLISION);
     simulation.stop();
     simulation.restart();
 
     expect(simulation.getState().status).toBe("stopped");
+  });
+
+  it("tells which pendulums collided while halted", () => {
+    const simulation = createSimulation({ id: 1 });
+
+    simulation.start();
+    simulation.halt(COLLISION);
+
+    expect(simulation.getState().collision).toEqual(COLLISION);
+  });
+
+  it("forgets the collision once it restarts", () => {
+    const simulation = createSimulation({ id: 1 });
+
+    simulation.start();
+    simulation.halt(COLLISION);
+    simulation.restart();
+
+    expect(simulation.getState().collision).toBeNull();
+  });
+
+  it("forgets the collision when stopped during the halt", () => {
+    const simulation = createSimulation({ id: 1 });
+
+    simulation.start();
+    simulation.halt(COLLISION);
+    simulation.stop();
+
+    expect(simulation.getState().collision).toBeNull();
+  });
+
+  it("ignores a halt while paused, so it shows no collision", () => {
+    const simulation = createSimulation({ id: 1 });
+
+    simulation.start();
+    simulation.pause();
+    simulation.halt(COLLISION);
+
+    expect(simulation.getState()).toMatchObject({ status: "paused", collision: null });
   });
 
   it("hangs each pendulum 1 m to the right of the previous one", () => {

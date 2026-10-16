@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createRestartBarrier, RESTART_DELAY_MS } from "@/barrier";
+import { RESTART_DELAY_MS } from "@shared";
+import { createRestartBarrier } from "@/barrier";
 
 function setup(onlineIds: number[]) {
   const alive = new Set(onlineIds);
