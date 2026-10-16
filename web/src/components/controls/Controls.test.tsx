@@ -37,4 +37,12 @@ describe("Controls", () => {
     expect(isEnabled("Pause")).toBe(false);
     expect(isEnabled("Stop")).toBe(true);
   });
+
+  it("allows only Stop when halted by a collision", () => {
+    renderControls("halted");
+
+    expect(isEnabled("Start")).toBe(false);
+    expect(isEnabled("Pause")).toBe(false);
+    expect(isEnabled("Stop")).toBe(true);
+  });
 });

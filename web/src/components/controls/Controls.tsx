@@ -12,7 +12,11 @@ type Props = {
 export function Controls({ status, onStart, onPause, onStop }: Props) {
   return (
     <div className="flex gap-2">
-      <button className={BUTTON} onClick={onStart} disabled={status === "running"}>
+      <button
+        className={BUTTON}
+        onClick={onStart}
+        disabled={status === "running" || status === "halted"}
+      >
         Start
       </button>
       <button className={BUTTON} onClick={onPause} disabled={status !== "running"}>

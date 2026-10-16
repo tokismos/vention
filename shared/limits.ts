@@ -9,4 +9,4 @@ export const LIMITS: Record<keyof PendulumConfig, Limit> = {
 
 export const MAX_BALL_RADIUS = 0.3;
 
-export const COLLISION_GAP = 0.05;
+export const COLLISION_GAP = 0.2;
