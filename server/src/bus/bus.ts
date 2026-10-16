@@ -19,10 +19,14 @@ export function connectBus({ brokerUrl, pendulumId }: BusOptions) {
     state.republish();
   });
 
+  function onOffline(handler: () => void) {
+    client.on("offline", handler);
+  }
+
   async function close() {
     if (client.connected) await Promise.all([state.clear(), clearPresence({ client, pendulumId })]);
     await client.endAsync();
   }
 
-  return { publishState: state.publish, close };
+  return { publishState: state.publish, onOffline, close };
 }

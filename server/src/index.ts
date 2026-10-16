@@ -5,8 +5,9 @@ import { createSimulation } from "@/simulation";
 
 const { pendulumId, port, brokerUrl } = loadConfig(process.env);
 
-const { publishState, close } = connectBus({ brokerUrl, pendulumId });
+const { publishState, onOffline, close } = connectBus({ brokerUrl, pendulumId });
 const simulation = createSimulation({ id: pendulumId, onChange: publishState });
+onOffline(simulation.pause);
 publishState(simulation.getState());
 
 createApp(simulation).listen(port, () => {
