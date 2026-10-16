@@ -1,7 +1,8 @@
-import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useSyncExternalStore } from "react";
 import type { ServerState, Status } from "@shared";
-import { pendulumIds, sendCommand, type Command } from "@/api";
-import { stateQuery } from "./stateQuery";
+import { sendCommandToAll, sendConfig, type Command } from "@/api";
+import { pendulumFeed } from "@/bus";
 
 function overallStatus(pendulums: ServerState[]): Status {
   if (pendulums.some(({ status }) => status === "running")) return "running";
@@ -9,41 +10,27 @@ function overallStatus(pendulums: ServerState[]): Status {
   return "stopped";
 }
 
-function unreachableMessage(ids: number[]): string {
-  return `Could not reach ${ids.length === 1 ? "pendulum" : "pendulums"} ${ids.join(", ")}`;
-}
-
 export function usePendulums() {
-  const queryClient = useQueryClient();
-  const ids = pendulumIds();
-  const results = useQueries({ queries: ids.map((id) => stateQuery(id)) });
-  const pendulums = results.flatMap(({ data, isError }) => (data && !isError ? [data] : []));
-  const offlineIds = ids.filter(
-    (_, index) => !results[index].isSuccess && results[index].errorUpdateCount > 0,
-  );
+  const { subscribe, getSnapshot } = pendulumFeed();
+  const { connection, ids, pendulums, offlineIds } = useSyncExternalStore(subscribe, getSnapshot);
+  const onlineIds = pendulums.map(({ id }) => id);
 
   const { mutate: runAll, error: commandError } = useMutation({
-    mutationFn: async (command: Command) => {
-      const answers = await Promise.allSettled(ids.map((id) => sendCommand({ id, command })));
-      const failedIds = ids.filter((_, index) => answers[index].status === "rejected");
-
-      for (const answer of answers) {
-        if (answer.status === "fulfilled") {
-          queryClient.setQueryData(stateQuery(answer.value.id).queryKey, answer.value);
-        }
-      }
-      if (failedIds.length > 0) throw new Error(unreachableMessage(failedIds));
-    },
+    mutationFn: (command: Command) => sendCommandToAll({ ids: onlineIds, command }),
   });
+  const { mutate: updateConfig, error: configError } = useMutation({ mutationFn: sendConfig });
 
   return {
+    connection,
     ids,
     pendulums,
     offlineIds,
     status: overallStatus(pendulums),
     commandError: commandError?.message ?? null,
+    configError: configError?.message ?? null,
     start: () => runAll("start"),
     pause: () => runAll("pause"),
     stop: () => runAll("stop"),
+    updateConfig,
   };
 }

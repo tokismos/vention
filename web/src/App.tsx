@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usePendulums, useSimulation } from "@/hooks";
+import { usePendulums } from "@/hooks";
 import {
   Controls,
   ConfigPanel,
@@ -13,9 +13,20 @@ const FIRST_PENDULUM_ID = 1;
 
 export default function App() {
   const [selectedId, setSelectedId] = useState(FIRST_PENDULUM_ID);
-  const { config, connection, configError, isLocked, isLoading, updateConfig } =
-    useSimulation(selectedId);
-  const { ids, pendulums, offlineIds, status, commandError, start, pause, stop } = usePendulums();
+  const {
+    connection,
+    ids,
+    pendulums,
+    offlineIds,
+    status,
+    commandError,
+    configError,
+    start,
+    pause,
+    stop,
+    updateConfig,
+  } = usePendulums();
+  const selected = pendulums.find((pendulum) => pendulum.id === selectedId);
 
   return (
     <div className="flex min-h-screen">
@@ -35,10 +46,16 @@ export default function App() {
           <p className="text-sm text-red-600">Offline: {offlineIds.join(", ")}</p>
         )}
         {configError && <p className="text-sm text-red-600">{configError}</p>}
-        {config && <ConfigPanel config={config} disabled={isLocked} onChange={updateConfig} />}
+        {selected && (
+          <ConfigPanel
+            config={selected.config}
+            disabled={selected.status !== "stopped"}
+            onChange={(change) => updateConfig({ id: selectedId, change })}
+          />
+        )}
       </aside>
       <main className="flex-1 p-6">
-        {isLoading && <p>Loading…</p>}
+        {connection === "connecting" && <p>Loading…</p>}
         <PendulumScene pendulums={pendulums} selectedId={selectedId} />
       </main>
     </div>
