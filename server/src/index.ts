@@ -1,5 +1,6 @@
 import type { ServerState } from "@shared";
 import { createApp } from "@/api";
+import { createRestartBarrier } from "@/barrier";
 import { connectBus } from "@/bus";
 import { loadConfig } from "@/config";
 import { findCollision } from "@/physics";
@@ -7,13 +8,17 @@ import { createSimulation } from "@/simulation";
 
 const { pendulumId, port, brokerUrl } = loadConfig(process.env);
 
-const { publishState, neighbors, stopAll, onOffline, onStop, close } = connectBus({
-  brokerUrl,
-  pendulumId,
-});
+const { publishState, neighbors, stopAll, restartAll, onOffline, onStop, onRestart, close } =
+  connectBus({ brokerUrl, pendulumId });
 const simulation = createSimulation({ id: pendulumId, onChange: handleChange });
+const barrier = createRestartBarrier({ alive: neighbors.alive, restart: simulation.restart });
+
 onOffline(simulation.pause);
-onStop(simulation.halt);
+onStop(() => {
+  simulation.halt();
+  restartAll();
+});
+onRestart(barrier.restartHeard);
 publishState(simulation.getState());
 
 function handleChange(state: ServerState) {
