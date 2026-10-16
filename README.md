@@ -1,6 +1,6 @@
 # Pendulum Simulation
 
-A pendulum simulated on a Node.js server, drawn and controlled from a React web app. You can start, pause and stop it, and change its starting angle, string length and mass.
+A pendulum simulated on a Node.js server, drawn and controlled from a React web app. You can start, pause and stop it, and change its starting angle, string length and mass. When two balls touch, every pendulum stops, and they all restart together 5 seconds later.
 
 ## Quick start
 
@@ -47,37 +47,47 @@ Run them from the root.
 
 Each server owns one pendulum, moves it 60 times per second, and publishes its state to the broker on every change. The web app never computes physics: it subscribes to every pendulum's presence and state, draws what arrives, and sends commands with REST when you click.
 
+### Collisions
+
+1. After every step, a server checks its ball against its online neighbors' balls. They collide when the gap between them is 20 cm or less (`COLLISION_GAP`).
+2. The server that sees it freezes its pendulum (status `halted`) and sends `system/stop` with the two ids, for example `[2, 3]`.
+3. Every server that hears STOP freezes too, keeps the two ids in its state, and answers `system/restart`.
+4. Once every online pendulum has sent RESTART, each server waits 5 seconds (`RESTART_DELAY_MS`) and restarts from its starting angle.
+5. The page sees the `halted` status and the ids in the state, and shows "Pendulums 2 and 3 collided. Restarting in 5 s." Only Stop works during the halt.
+
 ```
 server/src
-  physics/      step(): moves the pendulum by one time step (pure function)
-  simulation/   createSimulation(): start, pause, stop, config, and the timer
+  physics/      step(): moves the pendulum by one time step (pure function), and collides(): do two balls touch
+  simulation/   createSimulation(): start, pause, stop, halt, restart, config, and the timer
+  barrier/      createRestartBarrier(): waits for every RESTART, then restarts after 5 seconds
   api/          createApp() and the HTTP routes, with input validation
   config/       loadConfig(): reads and checks PENDULUM_ID, PORT, BROKER_URL
   broker/       startBroker(): the MQTT broker (Aedes), TCP 1883 and WebSocket 8888
-  bus/          connectBus(): presence, Last Will, the state published on every change, and pause when offline
+  bus/          connectBus(): presence, Last Will, the state published on every change, STOP and RESTART, and pause when offline
 web/src
   api/          axios client and one function per command route
   bus/          pendulumFeed(): one MQTT connection, a fresh picture of every pendulum per frame
     feed.ts       the wiring: connects, listens, tells React when the picture changes
-    snapshot.ts   toSnapshot(): the online pendulums and the offline ids, ready to draw
+    snapshot.ts   toSnapshot(): the online pendulums, the offline ids, the overall status and the collision, ready to draw
+    overallStatus.ts  overallStatus(): one status for all pendulums, halted first
     brokerUrl.ts  the broker's address: the page's own host + /mqtt
   hooks/        usePendulums(): the live picture of every pendulum, plus start, pause, stop and config
-  components/   controls (buttons, sliders, badges) and the pendulum drawing
+  components/   controls (buttons, sliders, badges, collision banner) and the pendulum drawing
 shared/
-  types.ts      types used by both apps (Status, PendulumConfig, ServerState)
-  limits.ts     LIMITS and MAX_BALL_RADIUS, used by the server checks, the sliders and the drawing
-  topics.ts     the MQTT topic names, used by both apps
+  types.ts      types used by both apps (Status, PendulumConfig, ServerState, Collision)
+  limits.ts     LIMITS, MAX_BALL_RADIUS, COLLISION_GAP and RESTART_DELAY_MS
+  topics.ts     the MQTT topic names, including system/stop and system/restart
   liveState.ts  createLiveState(), applyMessage(): who is online and each pendulum's latest state
 ```
 
 ### API
 
-Every successful call returns the full state: `{ status, config, angle, velocity }`. Errors return `{ error: "message" }`.
+Every successful call returns the full state: `{ id, status, config, angle, velocity, ball, collision }`. `collision` is the two ids that collided while `halted`, otherwise `null`. Errors return `{ error: "message" }`.
 
 | Route          | What it does                         | Errors                                        |
 | -------------- | ------------------------------------ | --------------------------------------------- |
 | `GET /state`   | Returns the current state            |                                               |
-| `POST /start`  | Starts or resumes the pendulum       |                                               |
+| `POST /start`  | Starts or resumes, ignored if halted |                                               |
 | `POST /pause`  | Freezes it where it is               |                                               |
 | `POST /stop`   | Stops it and resets it to its start  |                                               |
 | `POST /config` | Changes `angleDeg`, `length`, `mass` | 400 if a value is invalid, 409 if not stopped |
@@ -116,6 +126,9 @@ Allowed values: angle from -90 to 90 degrees, length from 0.5 to 3 m, mass from 
 - The config can only change when the pendulum is stopped (409 otherwise). Changing the length mid-swing would make the pendulum jump.
 - Mass only changes the size of the drawn ball. In a real pendulum without air resistance, mass does not change the motion.
 - `shared/` holds anything both apps use, whatever kind of code it is: today the types, `LIMITS`, the MQTT topic helpers and the live state. Each lives there once and is never copied between the apps.
+- `halted` is a separate status from `paused`. Start is ignored while halted, so a click cannot break the group restart. Only Stop works, and it cancels the restart for that pendulum.
+- The two collided ids travel inside each pendulum's state, not only in the STOP message. The broker keeps the state, so a page opened during a halt still shows the collision.
+- The page counts down 5 seconds from the moment it sees the collision. It does not compare the server's clock with the browser's clock, which can differ.
 - `createSimulation()` and `createApp()` are factories, so tests build a fresh pendulum and app each time, with no shared state.
 
 ## Tests
@@ -129,13 +142,18 @@ Each test protects one behavior that would be easy to break without noticing.
 Server (`server/src`):
 
 - `physics/physics.test.ts`: after 10 simulated minutes, the pendulum still swings up to its starting angle, so the formula does not gain or lose energy.
-- `simulation/simulation.test.ts`: pressing Start twice does not double the speed, pause freezes the pendulum, resume continues from the same spot, and stop resets it.
+- `simulation/simulation.test.ts`: pressing Start twice does not double the speed, pause freezes the pendulum, resume continues from the same spot, and stop resets it. A halt freezes it and keeps the collided ids, Start is ignored while halted, a restart goes back to the start and forgets the collision, and a paused pendulum ignores a halt.
+- `physics/collision.test.ts`: balls collide up to the gap and not beyond, and a pendulum never collides with itself or with a crashed neighbor.
+- `barrier/barrier.test.ts`: the restart happens 5 seconds after every online pendulum sent RESTART, not before, and the count starts fresh after each restart.
 - `api/routes.test.ts`: a valid config is accepted, invalid values get a 400, and changes while running get a 409.
 - `config/config.test.ts`: the port comes from the pendulum id, and an invalid id stops the server at startup.
 
 Web (`web/src`):
 
-- `components/controls/Controls.test.tsx`: the right buttons are enabled for each status.
+- `components/controls/Controls.test.tsx`: the right buttons are enabled for each status, and only Stop while halted.
+- `components/controls/CollisionBanner.test.tsx`: the banner names the two pendulums and counts down to the restart.
+- `bus/overallStatus.test.ts`: one halted pendulum makes the whole group halted.
+- `bus/snapshot.test.ts`: the snapshot carries the collision a halted pendulum reports.
 
 The tests never wait in real time. Timer tests use Vitest's fake clock, so the results are the same on every run. Each test was checked by breaking the code it protects and watching it fail.
 
@@ -145,7 +163,8 @@ On every pull request and every push to `main`, GitHub Actions installs the pack
 
 ## Known limitations
 
-- Neighbor monitoring, collision detection and the STOP and RESTART messages are not built yet.
+- Pendulums restart from the same angles, so a setup that collides every swing stops and restarts every 5 seconds until you press Stop.
+- A page opened during a halt starts its countdown at 5 seconds, so it may show more time than is left.
 - The pendulum runs about 2% slower than real time. Node timers fire slightly late, and each step always moves by exactly 1/60 s.
 - A pendulum that crashes keeps its last state on the broker (only its presence is cleared by the Last Will). The page shows it as offline until it comes back.
 - mqtt.js makes the page's JavaScript about 640 kB (200 kB compressed).
