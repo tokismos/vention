@@ -57,13 +57,17 @@ server/src
   bus/          connectBus(): presence, Last Will, the state published on every change, and pause when offline
 web/src
   api/          axios client and one function per command route
-  bus/          pendulumFeed(): one MQTT connection, a fresh snapshot of every pendulum per frame
+  bus/          pendulumFeed(): one MQTT connection, a fresh picture of every pendulum per frame
+    feed.ts       the wiring: connects, listens, tells React when the picture changes
+    snapshot.ts   toSnapshot(): the online pendulums and the offline ids, ready to draw
+    brokerUrl.ts  the broker's address: the page's own host + /mqtt
   hooks/        usePendulums(): the live picture of every pendulum, plus start, pause, stop and config
   components/   controls (buttons, sliders, badges) and the pendulum drawing
 shared/
   types.ts      types used by both apps (Status, PendulumConfig, ServerState)
   limits.ts     LIMITS and MAX_BALL_RADIUS, used by the server checks, the sliders and the drawing
   topics.ts     the MQTT topic names, used by both apps
+  liveState.ts  createLiveState(), applyMessage(): who is online and each pendulum's latest state
 ```
 
 ### API
@@ -104,11 +108,14 @@ Allowed values: angle from -90 to 90 degrees, length from 0.5 to 3 m, mass from 
 
 - The server is the single source of truth. The web app only draws what the server says, so every client sees the same pendulum.
 - The page reads live state from MQTT and writes with REST. Commands need an answer (400, 409), which MQTT has no built-in way to give, while positions are a stream that MQTT pushes. Polling every pendulum 20 times per second is gone.
+- The page redraws at most once per screen frame (`requestAnimationFrame`). About 300 messages arrive per second with 5 pendulums, but the screen only shows about 60 images per second.
+- After every (re)connect, the page forgets what it knew and rebuilds from the broker's kept messages. A pendulum that died while the page was disconnected would otherwise stay on screen as a ghost.
+- A pendulum with a kept state but no presence crashed (its Last Will cleared the presence), so the page shows it as offline.
 - Fail safe: when a server loses the broker, it pauses its pendulum. Without the broker it cannot hear a STOP from its neighbors, so it must not keep swinging blind. It stays paused after reconnecting, and its first message tells the broker it is paused. You press Start to resume.
 - Fixed time step of 1/60 s. This formula keeps the swing height stable over time, and the same number of steps always gives the same result, which makes the physics easy to test.
 - The config can only change when the pendulum is stopped (409 otherwise). Changing the length mid-swing would make the pendulum jump.
 - Mass only changes the size of the drawn ball. In a real pendulum without air resistance, mass does not change the motion.
-- `shared/` holds types only, no code. Type imports disappear at build time, so each app stays independent.
+- `shared/` holds anything both apps use, whatever kind of code it is: today the types, `LIMITS`, the MQTT topic helpers and the live state. Each lives there once and is never copied between the apps.
 - `createSimulation()` and `createApp()` are factories, so tests build a fresh pendulum and app each time, with no shared state.
 
 ## Tests

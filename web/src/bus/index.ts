@@ -1,1 +1,1 @@
-export * from "./feed";
+export { pendulumFeed } from "./feed";

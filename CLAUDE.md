@@ -25,14 +25,13 @@
 - A type used by only one file stays in that file, even when it describes a function's input or output (e.g. `SimulationOptions` next to `createSimulation`).
 - As soon as another file imports it, it moves to a `types.ts` in the same folder, re-exported by that folder's `index.ts` (e.g. `Simulation` in `simulation/types.ts`, `Command` in `api/types.ts`).
 - A type used by several folders that belongs to none of them goes in the app's `types/` folder (e.g. `web/src/types/connection.ts`). Never import a type from a hook or component file.
-- Types used by both `web/` and `server/` live once in `shared/types.ts`. Never copy a type between the two apps.
-- Constant values used by both apps live once in `shared/` too (e.g. `LIMITS` in `shared/limits.ts`, used by the server validation, the sliders and the drawing). Never copy a value between the two apps.
+- Anything used by both `web/` and `server/` lives once in `shared/`, whatever kind of code it is: types (`shared/types.ts`), values (`LIMITS` in `shared/limits.ts`), functions (the topic helpers in `shared/topics.ts`). Each file is named by what it holds. Never copy code between the two apps.
 - Import shared types with `import type { Status } from "@shared"`, and shared values with a normal import: `import { LIMITS } from "@shared"`.
-- Shared values are real code, so every tool must find `@shared`. It is set in four places that must stay in sync: `paths` in `web/tsconfig.app.json` and `server/tsconfig.json`, and `resolve.alias` in `web/vite.config.ts` and `server/vitest.config.ts`.
+- Shared values and functions are real code, so every tool must find `@shared`. It is set in four places that must stay in sync: `paths` in `web/tsconfig.app.json` and `server/tsconfig.json`, and `resolve.alias` in `web/vite.config.ts` and `server/vitest.config.ts`.
 
 ## React
 
-- Destructure what a hook returns: `const { status, start } = useSimulation()`, not `const sim = useSimulation()`.
+- Destructure what a hook returns: `const { status, start } = usePendulums()`, not `const pendulums = usePendulums()`.
 
 ## Pull requests
 

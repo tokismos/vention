@@ -29,3 +29,13 @@ export type ServerState = PendulumState & {
   config: PendulumConfig;
   ball: Ball;
 };
+
+export type LiveState = {
+  alive: Set<number>;
+  states: Map<number, ServerState>;
+};
+
+export type PendulumMessage = {
+  topic: string;
+  text: string;
+};
