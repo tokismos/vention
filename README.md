@@ -54,7 +54,7 @@ server/src
   api/          createApp() and the HTTP routes, with input validation
   config/       loadConfig(): reads and checks PENDULUM_ID, PORT, BROKER_URL
   broker/       startBroker(): the MQTT broker (Aedes), TCP 1883 and WebSocket 8888
-  bus/          connectBus(): presence, Last Will, and the state published on every change
+  bus/          connectBus(): presence, Last Will, the state published on every change, and pause when offline
 web/src
   api/          axios client and one function per command route
   bus/          pendulumFeed(): one MQTT connection, a fresh snapshot of every pendulum per frame
@@ -104,6 +104,7 @@ Allowed values: angle from -90 to 90 degrees, length from 0.5 to 3 m, mass from 
 
 - The server is the single source of truth. The web app only draws what the server says, so every client sees the same pendulum.
 - The page reads live state from MQTT and writes with REST. Commands need an answer (400, 409), which MQTT has no built-in way to give, while positions are a stream that MQTT pushes. Polling every pendulum 20 times per second is gone.
+- Fail safe: when a server loses the broker, it pauses its pendulum. Without the broker it cannot hear a STOP from its neighbors, so it must not keep swinging blind. It stays paused after reconnecting, and its first message tells the broker it is paused. You press Start to resume.
 - Fixed time step of 1/60 s. This formula keeps the swing height stable over time, and the same number of steps always gives the same result, which makes the physics easy to test.
 - The config can only change when the pendulum is stopped (409 otherwise). Changing the length mid-swing would make the pendulum jump.
 - Mass only changes the size of the drawn ball. In a real pendulum without air resistance, mass does not change the motion.
